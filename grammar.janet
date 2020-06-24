@@ -78,7 +78,7 @@
                  :close (cmt (sequence
                               (not (> -1 "`"))
                               (backref :n)
-                              ':delim)
+                              (capture :delim))
                              ,=)
                  :main (drop (sequence
                               :open
