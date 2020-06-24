@@ -30,7 +30,7 @@
     :comment (sequence
               (any :ws)
               "#"
-              (any (if-not (+ "\n" -1) 1))
+              (any (if-not (choice "\n" -1) 1))
               (any :ws))
     #
     :constant (choice "false" "nil" "true")
@@ -76,7 +76,7 @@
     :long-bytes {:delim (some "`")
                  :open (capture :delim :n)
                  :close (cmt (sequence
-                              (not (> -1 "`"))
+                              (not (look -1 "`"))
                               (backref :n)
                               (capture :delim))
                              ,=)
