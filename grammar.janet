@@ -237,22 +237,22 @@
  # !
 
  (peg/match jg-capture "[1]")
- # => @[[1]]
+ # => @["[1]"]
 
  (peg/match jg-capture "# hello")
  # => @["# hello"]
 
  (peg/match jg-capture "``hello``")
- # => @["``hello``"])
+ # => @["``hello``"]
 
  (peg/match jg-capture "8")
  # => @["8"]
 
  (peg/match jg-capture "[:a :b]")
- # => @["[:a :b]"])
+ # => @["[:a :b]"]
 
  (peg/match jg-capture "[:a :b] 1")
- # => @["[:a :b] 1"])
+ # => @["[:a :b] 1"]
 
  (def sample-source
    (string "# \"my test\"\n"
@@ -285,9 +285,10 @@
  # => @["# \"my test\"\n"]
 
  (peg/match jg-capture-one sample-source 11)
- # => @["\n(+ 1 1)\n"])
+ # => @["\n(+ 1 1)\n"]
 
  (peg/match jg-capture-one sample-source 20)
  # => @["# => 2\n"]
 
  )
+
