@@ -218,6 +218,84 @@
 
 (comment
 
+ (peg/match jg-capture "nil")
+ # => @["nil"]
+
+ (peg/match jg-capture "true")
+ # => @["true"]
+
+ (peg/match jg-capture "false")
+ # => @["false"]
+
+ (peg/match jg-capture "symbol")
+ # => @["symbol"]
+
+ (peg/match jg-capture "kebab-case-symbol")
+ # => @["kebab-case-symbol"]
+
+ (peg/match jg-capture "snake_case_symbol")
+ # => @["snake_case_symbol"]
+
+ (peg/match jg-capture "my-module/my-function")
+ # => @["my-module/my-function"]
+
+ (peg/match jg-capture "*****")
+ # => @["*****"]
+
+ (peg/match jg-capture "!%$^*__--__._+++===~-crazy-symbol")
+ # => @["!%$^*__--__._+++===~-crazy-symbol"]
+
+ (peg/match jg-capture "*global-var*")
+ # => @["*global-var*"]
+
+ (peg/match jg-capture "你好")
+ # => @["\xE4\xBD\xA0\xE5\xA5\xBD"]
+
+ (peg/match jg-capture ":keyword")
+ # => @[":keyword"]
+
+ (peg/match jg-capture ":range")
+ # => @[":range"]
+
+ (peg/match jg-capture ":0x0x0x0")
+ # => @[":0x0x0x0"]
+
+ (peg/match jg-capture ":a-keyword")
+ # => @[":a-keyword"]
+
+ (peg/match jg-capture "::")
+ # => @["::"]
+
+ (peg/match jg-capture ":")
+ # => @[":"]
+
+ (peg/match jg-capture "0")
+ # => @["0"]
+
+ (peg/match jg-capture "12")
+ # => @["12"]
+
+ (peg/match jg-capture "-65912")
+ # => @["-65912"]
+
+ (peg/match jg-capture "1.3e18")
+ # => @["1.3e18"]
+
+ (peg/match jg-capture "-1.3e18")
+ # => @["-1.3e18"]
+
+ (peg/match jg-capture "18r123C")
+ # => @["18r123C"]
+
+ (peg/match jg-capture "11raaa&a")
+ # => @["11raaa&a"]
+
+ (peg/match jg-capture "1_000_000")
+ # => @["1_000_000"]
+
+ (peg/match jg-capture "0xbeef")
+ # => @["0xbeef"]
+
  (peg/match jg-capture "\"\\u001\"")
  # ! "bad escape"
 
