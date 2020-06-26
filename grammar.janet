@@ -27,11 +27,10 @@
                 :ptuple :btuple
                 :struct :table)
     #
-    :comment (sequence
-              (any :ws)
-              "#"
-              (any (if-not (choice "\n" -1) 1))
-              (any :ws))
+    :comment (sequence (any :ws)
+                       "#"
+                       (any (if-not (choice "\n" -1) 1))
+                       (any :ws))
     #
     :constant (choice "false" "nil" "true")
     #
@@ -54,18 +53,17 @@
     #
     :string :bytes
     #
-    :bytes (sequence
-            "\""
-            (any (choice :escape (if-not "\"" 1)))
-            "\"")
+    :bytes (sequence "\""
+                     (any (choice :escape (if-not "\"" 1)))
+                     "\"")
     #
-    :escape (sequence
-             "\\"
-             (choice
-              (set "0efnrtvz\"\\")
-              (sequence "x" [2 :hex])
-              (sequence (choice "u" "U") [4 :d])
-              (error (constant "bad escape"))))
+    :escape (sequence "\\"
+                      (choice
+                       (set "0efnrtvz\"\\")
+                       (sequence "x" [2 :hex])
+                       (sequence "u" [4 :d])
+                       (sequence "U" [6 :d])
+                       (error (constant "bad escape"))))
     #
     :hex (range "09" "af" "AF")
     #
@@ -301,6 +299,9 @@
 
  (peg/match jg-capture "\"\\u0001\"")
  # => @["\"\\u0001\""]
+
+ (peg/match jg-capture "\"\\U000008\"")
+ # => @["\"\\U000008\""]
 
  (peg/match jg-capture "(def a 1)")
  # => @["(def a 1)"]
