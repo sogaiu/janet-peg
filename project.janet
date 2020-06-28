@@ -1,78 +1,41 @@
-# XXX: things from jpm
-(def- is-win (= (os/which) :windows))
-(def- is-mac (= (os/which) :macos))
-(def- sep (if is-win "\\" "/"))
-
-(def proj-root
-  (os/cwd))
-
-(def src-root
-  (string proj-root sep "janet-peg-grammar"))
-
-(def judge-root
-  (string proj-root sep "judge"))
+(post-deps
+ (import jg-chambers/phony-judge)
+ (import path))
 
 (declare-project
-  :name "janet-peg-grammar"
-  :url "https://github.com/sogaiu/janet-peg-grammar"
-  :repo "git+https://github.com/sogaiu/janet-peg-grammar.git")
+ :name "janet-peg-grammar"
+ :url "https://github.com/sogaiu/janet-peg-grammar"
+ :repo "git+https://github.com/sogaiu/janet-peg-grammar.git"
+ :dependencies [
+   # below here, just for project.janet
+   "https://github.com/janet-lang/path.git"
+   "https://github.com/sogaiu/jg-chambers.git"
+ ])
 
-(declare-source
-  :source [(string src-root sep "grammar.janet")])
+(post-deps
 
-(phony "netrepl" []
-       (os/execute
-        ["janet" "-e" (string "(os/cd \"" src-root "\")"
-``
-         (import spork/netrepl)
-         (netrepl/server)
-``      )] :p))
+ (def proj-root
+   (os/cwd))
 
-(phony "judge" ["build"]
-       # XXX: jg needs to be in PATH -- check and fail if it doesn't exist
-       (defn print-dashes
-         []
-         (print (string/repeat "-" 60)))
-       # XXX: work on platform independent version at some point?
-       #      macos' cp doesn't support the necessary options and
-       #      windows doesn't have cp
-       # XXX: doesn't work well if there is already a "judge" directory
-       (when (not (os/stat judge-root))
-         (print (string "Creating symlink mirror of source at: "
-                        judge-root))
-         (os/execute
-          ["cp" "--archive" "--symbolic-link"
-           (string src-root sep) judge-root] :p))
-       # XXX: make a recursive traversal version
-       (each path (os/dir src-root)
-         (def fpath (string src-root sep path))
-         (case (os/stat fpath :mode)
-           :file (os/execute ["jg"
-                              "--prepend"
-                              "--number" "0"
-                              "--output" (string judge-root sep "judge-" path)
-                              fpath] :p)
-           :directory (print "Sorry, no recursion yet.")))
-       (print "Judging...")
-       # XXX: adapted from jpm's "test" phony target
-       (defn dodir
-         [dir]
-         (each sub (sort (os/dir dir))
-           (def ndir (string dir sep sub))
-           (case (os/lstat ndir :mode)
-             :directory (dodir ndir)
-             :file (when (string/has-suffix? ".janet" ndir)
-                     (print-dashes)
-                     (print "Running " ndir " ...")
-                     (def result
-                       (os/execute [(dyn :executable "janet")
-                                    "-e" (string "(os/cd "
-                                                 "\"" judge-root "\""
-                                                 ")")
-                                    ndir] :p)))
-             # XXX: kind of a hack and limiting, but possibly worth it
-             #      could decide whether test according to naming convention...
-             :link (print "Skipping non-test " ndir))))
-       (dodir judge-root)
-       (print-dashes)
-       (print "All judgements made."))
+ (def src-root
+   (path/join proj-root "janet-peg-grammar"))
+
+ (declare-source
+  :source [(path/join src-root "grammar.janet")])
+
+ (phony "netrepl" []
+        (os/execute
+         ["janet" "-e" (string "(os/cd \"" src-root "\")"
+                               "(import spork/netrepl)"
+                               "(netrepl/server)")] :p))
+
+ # XXX: the following can be used to arrange for the overriding of the
+ #      "test" phony target -- thanks to rduplain and bakpakin
+ (put (dyn :rules) "test" nil)
+ (phony "test" ["build"]
+        (phony-judge/execute proj-root src-root))
+
+ (phony "judge" ["build"]
+        (phony-judge/execute proj-root src-root))
+
+)
