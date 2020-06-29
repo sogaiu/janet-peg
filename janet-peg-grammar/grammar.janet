@@ -58,12 +58,11 @@
                      "\"")
     #
     :escape (sequence "\\"
-                      (choice
-                       (set "0efnrtvz\"\\")
-                       (sequence "x" [2 :hex])
-                       (sequence "u" [4 :d])
-                       (sequence "U" [6 :d])
-                       (error (constant "bad escape"))))
+                      (choice (set "0efnrtvz\"\\")
+                              (sequence "x" [2 :hex])
+                              (sequence "u" [4 :d])
+                              (sequence "U" [6 :d])
+                              (error (constant "bad escape"))))
     #
     :hex (range "09" "af" "AF")
     #
@@ -71,43 +70,37 @@
     #
     :long-string :long-bytes
     #
-    :long-bytes {:delim (some "`")
+    :long-bytes {:main (drop (sequence
+                              :open
+                              (any (if-not :close 1))
+                              :close))
                  :open (capture :delim :n)
+                 :delim (some "`")
                  :close (cmt (sequence
                               (not (look -1 "`"))
                               (backref :n)
                               (capture :delim))
-                             ,=)
-                 :main (drop (sequence
-                              :open
-                              (any (if-not :close 1))
-                              :close))}
+                             ,=)}
     #
     :long-buffer (sequence "@" :long-bytes)
     #
     :parray (sequence "@" :ptuple)
     #
-    :ptuple (sequence
-             "("
-             :root
-             (choice ")"
-                     (error "")))
+    :ptuple (sequence "("
+                      :root
+                      (choice ")" (error "")))
     #
     :barray (sequence "@" :btuple)
     #
-    :btuple (sequence
-             "["
-             :root
-             (choice "]"
-                     (error "")))
+    :btuple (sequence "["
+                      :root
+                      (choice "]" (error "")))
     # XXX: constraining to an even number of values doesn't seem
     #      worth the work when considering that comments can also
     #      appear in a variety of locations...
-    :struct (sequence
-             "{"
-             :root
-             (choice "}"
-                     (error "")))
+    :struct (sequence "{"
+                      :root
+                      (choice "}" (error "")))
     #
     :table (sequence "@" :struct)
     #
@@ -370,4 +363,3 @@
  # => @["# => 2\n"]
 
  )
-
