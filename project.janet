@@ -1,5 +1,5 @@
 (post-deps
- (import jg-chambers/phony-judge)
+ (import jg-verdict/phony-judge)
  (import path))
 
 (declare-project
@@ -9,7 +9,7 @@
  :dependencies [
    # below here, just for project.janet
    "https://github.com/janet-lang/path.git"
-   "https://github.com/sogaiu/jg-chambers.git"
+   "https://github.com/sogaiu/jg-verdict.git"
  ])
 
 (post-deps
