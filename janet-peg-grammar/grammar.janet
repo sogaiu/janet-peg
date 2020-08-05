@@ -162,37 +162,37 @@
  (peg/match jg-one "\"\\u001\"")
  # ! "bad escape"
 
- (peg/match jg "\"\\u0001\"")
+ (peg/match jg-one "\"\\u0001\"")
  # => @[]
 
- (peg/match jg "(def a 1)")
+ (peg/match jg-one "(def a 1)")
  # => @[]
 
- (peg/match jg "[:a :b)")
+ (peg/match jg-one "[:a :b)")
  # ! "match error in range (6:6)"
 
- (peg/match jg "(def a # hi\n 1)")
+ (peg/match jg-one "(def a # hi\n 1)")
  # => @[]
 
- (peg/match jg "(def a # hi 1)")
+ (peg/match jg-one "(def a # hi 1)")
  # ! "match error in range (14:14)"
 
- (peg/match jg "[1]")
+ (peg/match jg-one "[1]")
  # => @[]
 
- (peg/match jg "# hello")
+ (peg/match jg-one "# hello")
  # => @[]
 
- (peg/match jg "``hello``")
+ (peg/match jg-one "``hello``")
  # => @[]
 
- (peg/match jg "8")
+ (peg/match jg-one "8")
  # => @[]
 
- (peg/match jg "[:a :b]")
+ (peg/match jg-one "[:a :b]")
  # => @[]
 
- (peg/match jg "[:a :b] 1")
+ (peg/match jg-one "[:a :b] 1")
  # => @[]
 
  )
