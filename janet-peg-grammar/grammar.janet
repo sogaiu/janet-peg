@@ -1,61 +1,76 @@
-# adapted from:
-#   https://janet-lang.org/docs/syntax.html
-
-# approximation of janet's grammar
 (def jg
-  ~{:main :root
+  ~{:main (any :input)
     #
-    :root (any :root0)
+    :input (choice :non_form
+                   :form)
     #
-    :root0 (choice :value :comment)
+    :non_form (choice :whitespace
+                      :comment)
     #
-    :value (sequence
-            (any (choice :ws :readermac))
-            :raw-value
-            (any :ws))
+    :whitespace (set " \0\f\n\r\t\v")
     #
-    :ws (set " \0\f\n\r\t\v")
+    :comment (sequence "#"
+                       (any (if-not (set "\r\n") 1)))
     #
-    :readermac (set "',;|~")
+    :form (choice :reader_macro
+                  :collection
+                  :literal)
     #
-    :raw-value (choice
-                :constant :number
-                :symbol :keyword
-                :string :buffer
-                :long-string :long-buffer
-                :parray :barray
-                :ptuple :btuple
-                :struct :table)
+    :reader_macro (choice :fn
+                          :quasiquote
+                          :quote
+                          :splice
+                          :unquote)
     #
-    :comment (sequence (any :ws)
-                       "#"
-                       (any (if-not (choice "\n" -1) 1))
-                       (any :ws))
+    :fn (sequence "|"
+                  (any :non_form)
+                  :form)
+    #
+    :quasiquote (sequence "~"
+                          (any :non_form)
+                          :form)
+    #
+    :quote (sequence "'"
+                     (any :non_form)
+                     :form)
+    #
+    :splice (sequence ";"
+                      (any :non_form)
+                      :form)
+    #
+    :unquote (sequence ","
+                       (any :non_form)
+                       :form)
+    #
+    :literal (choice :number
+                     :constant
+                     :buffer
+                     :string
+                     :long_buffer
+                     :long_string
+                     :keyword
+                     :symbol)
+    #
+    :collection (choice :array
+                        :bracket_array
+                        :tuple
+                        :bracket_tuple
+                        :table
+                        :struct)
+    #
+    :number (drop (cmt
+                   (capture (some :name_char))
+                   ,scan-number))
+    #
+    :name_char (choice (range "09" "AZ" "az" "\x80\xFF")
+                       (set "!$%&*+-./:<?=>@^_"))
     #
     :constant (choice "false" "nil" "true")
     #
-    :number (drop (cmt
-                   (capture :token)
-                   ,scan-number))
-    #
-    :token (some :symchars)
-    #
-    :symchars (choice
-               (range "09" "AZ" "az" "\x80\xFF")
-               # XXX: see parse.c's is_symbol_char which mentions:
-               #
-               #        \, ~, and |
-               #
-               #      but tools/symcharsgen.c does not...
-               (set "!$%&*+-./:<?=>@^_"))
-    #
-    :keyword (sequence ":" (any :symchars))
-    #
-    :string :bytes
-    #
-    :bytes (sequence "\""
-                     (any (choice :escape (if-not "\"" 1)))
-                     "\"")
+    :buffer (sequence "@\""
+                      (any (choice :escape
+                                   (if-not "\"" 1)))
+                      "\"")
     #
     :escape (sequence "\\"
                       (choice (set "0efnrtvz\"\\")
@@ -66,45 +81,62 @@
     #
     :hex (range "09" "af" "AF")
     #
-    :buffer (sequence "@" :bytes)
+    :string (sequence "\""
+                      (any (choice :escape
+                                   (if-not "\"" 1)))
+                      "\"")
     #
-    :long-string :long-bytes
+    :long_string :long_bytes
     #
-    :long-bytes {:main (drop (sequence
-                              :open
-                              (any (if-not :close 1))
-                              :close))
+    :long_bytes {:main (drop (sequence :open
+                                       (any (if-not :close 1))
+                                       :close))
                  :open (capture :delim :n)
                  :delim (some "`")
-                 :close (cmt (sequence
-                              (not (look -1 "`"))
-                              (backref :n)
-                              (capture :delim))
+                 :close (cmt (sequence (not (look -1 "`"))
+                                       (backref :n)
+                                       (capture :delim))
                              ,=)}
     #
-    :long-buffer (sequence "@" :long-bytes)
+    :long_buffer (sequence "@"
+                           :long_bytes)
     #
-    :parray (sequence "@" :ptuple)
+    :keyword (sequence ":"
+                       (any :name_char))
     #
-    :ptuple (sequence "("
-                      :root
-                      (choice ")" (error "")))
+    :symbol (some :name_char)
     #
-    :barray (sequence "@" :btuple)
+    :array (sequence "@("
+                      (any :input)
+                      (choice ")"
+                              (error "")))
     #
-    :btuple (sequence "["
-                      :root
-                      (choice "]" (error "")))
+    :tuple (sequence "("
+                      (any :input)
+                      (choice ")"
+                              (error "")))
+    #
+    :bracket_array (sequence "@["
+                             (any :input)
+                             (choice "]"
+                                     (error "")))
+    #
+    :bracket_tuple (sequence "["
+                             (any :input)
+                             (choice "]"
+                                     (error "")))
     # XXX: constraining to an even number of values doesn't seem
     #      worth the work when considering that comments can also
     #      appear in a variety of locations...
+    :table (sequence "@{"
+                      (any :input)
+                      (choice "}"
+                              (error "")))
+    #
     :struct (sequence "{"
-                      :root
-                      (choice "}" (error "")))
-    #
-    :table (sequence "@" :struct)
-    #
-    :symbol :token
+                      (any :input)
+                      (choice "}"
+                              (error "")))
     })
 
 (comment
@@ -144,222 +176,5 @@
 
  (peg/match jg "[:a :b] 1")
  # => @[]
-
- )
-
-# make a version of jg that matches a single form
-(def jg-one
-  (->
-   # jg is a struct, need something mutable
-   (table ;(kvs jg))
-   # just recognize one form
-   (put :main :root0)
-   # tried using a table with a peg but had a problem, so use a struct
-   table/to-struct))
-
-(comment
-
- (peg/match jg-one "\"\\u001\"")
- # ! "bad escape"
-
- (peg/match jg-one "\"\\u0001\"")
- # => @[]
-
- (peg/match jg-one "(def a 1)")
- # => @[]
-
- (peg/match jg-one "[:a :b)")
- # ! "match error in range (6:6)"
-
- (peg/match jg-one "(def a # hi\n 1)")
- # => @[]
-
- (peg/match jg-one "(def a # hi 1)")
- # ! "match error in range (14:14)"
-
- (peg/match jg-one "[1]")
- # => @[]
-
- (peg/match jg-one "# hello")
- # => @[]
-
- (peg/match jg-one "``hello``")
- # => @[]
-
- (peg/match jg-one "8")
- # => @[]
-
- (peg/match jg-one "[:a :b]")
- # => @[]
-
- (peg/match jg-one "[:a :b] 1")
- # => @[]
-
- )
-
-# make a capturing version of jg
-(def jg-capture
-  (->
-   # jg is a struct, need something mutable
-   (table ;(kvs jg))
-   # capture recognized bits
-   (put :main '(capture :root))
-   # tried using a table with a peg but had a problem, so use a struct
-   table/to-struct))
-
-(comment
-
- (peg/match jg-capture "nil")
- # => @["nil"]
-
- (peg/match jg-capture "true")
- # => @["true"]
-
- (peg/match jg-capture "false")
- # => @["false"]
-
- (peg/match jg-capture "symbol")
- # => @["symbol"]
-
- (peg/match jg-capture "kebab-case-symbol")
- # => @["kebab-case-symbol"]
-
- (peg/match jg-capture "snake_case_symbol")
- # => @["snake_case_symbol"]
-
- (peg/match jg-capture "my-module/my-function")
- # => @["my-module/my-function"]
-
- (peg/match jg-capture "*****")
- # => @["*****"]
-
- (peg/match jg-capture "!%$^*__--__._+++===~-crazy-symbol")
- # => @["!%$^*__--__._+++===~-crazy-symbol"]
-
- (peg/match jg-capture "*global-var*")
- # => @["*global-var*"]
-
- (peg/match jg-capture "你好")
- # => @["\xE4\xBD\xA0\xE5\xA5\xBD"]
-
- (peg/match jg-capture ":keyword")
- # => @[":keyword"]
-
- (peg/match jg-capture ":range")
- # => @[":range"]
-
- (peg/match jg-capture ":0x0x0x0")
- # => @[":0x0x0x0"]
-
- (peg/match jg-capture ":a-keyword")
- # => @[":a-keyword"]
-
- (peg/match jg-capture "::")
- # => @["::"]
-
- (peg/match jg-capture ":")
- # => @[":"]
-
- (peg/match jg-capture "0")
- # => @["0"]
-
- (peg/match jg-capture "12")
- # => @["12"]
-
- (peg/match jg-capture "-65912")
- # => @["-65912"]
-
- (peg/match jg-capture "1.3e18")
- # => @["1.3e18"]
-
- (peg/match jg-capture "-1.3e18")
- # => @["-1.3e18"]
-
- (peg/match jg-capture "18r123C")
- # => @["18r123C"]
-
- (peg/match jg-capture "11raaa&a")
- # => @["11raaa&a"]
-
- (peg/match jg-capture "1_000_000")
- # => @["1_000_000"]
-
- (peg/match jg-capture "0xbeef")
- # => @["0xbeef"]
-
- (peg/match jg-capture "\"\\u001\"")
- # ! "bad escape"
-
- (peg/match jg-capture "\"\\u0001\"")
- # => @["\"\\u0001\""]
-
- (peg/match jg-capture "\"\\U000008\"")
- # => @["\"\\U000008\""]
-
- (peg/match jg-capture "(def a 1)")
- # => @["(def a 1)"]
-
- (peg/match jg-capture "[:a :b)")
- # ! "match error in range (6:6)"
-
- (peg/match jg-capture "(def a # hi\n 1)")
- # => @["(def a # hi\n 1)"]
-
- (peg/match jg-capture "(def a # hi 1)")
- # !
-
- (peg/match jg-capture "[1]")
- # => @["[1]"]
-
- (peg/match jg-capture "# hello")
- # => @["# hello"]
-
- (peg/match jg-capture "``hello``")
- # => @["``hello``"]
-
- (peg/match jg-capture "8")
- # => @["8"]
-
- (peg/match jg-capture "[:a :b]")
- # => @["[:a :b]"]
-
- (peg/match jg-capture "[:a :b] 1")
- # => @["[:a :b] 1"]
-
- (def sample-source
-   (string "# \"my test\"\n"
-           "(+ 1 1)\n"
-           "# => 2\n"))
-
- (peg/match jg-capture sample-source)
- # => @["# \"my test\"\n(+ 1 1)\n# => 2\n"]
-
- )
-
-# make a version of jg that captures a single form
-(def jg-capture-one
-  (->
-   # jg is a struct, need something mutable
-   (table ;(kvs jg))
-   # capture just one form
-   (put :main '(capture :root0))
-   # tried using a table with a peg but had a problem, so use a struct
-   table/to-struct))
-
-(comment
-
- (def sample-source
-   (string "# \"my test\"\n"
-           "(+ 1 1)\n"
-           "# => 2\n"))
-
- (peg/match jg-capture-one sample-source)
- # => @["# \"my test\"\n"]
-
- (peg/match jg-capture-one sample-source 11)
- # => @["\n(+ 1 1)\n"]
-
- (peg/match jg-capture-one sample-source 20)
- # => @["# => 2\n"]
 
  )
