@@ -1,15 +1,15 @@
 (import ./vendor/path)
 
 (declare-project
- :name "janet-peg-grammar"
- :url "https://github.com/sogaiu/janet-peg-grammar"
- :repo "git+https://github.com/sogaiu/janet-peg-grammar.git")
+ :name "janet-peg"
+ :url "https://github.com/sogaiu/janet-peg"
+ :repo "git+https://github.com/sogaiu/janet-peg.git")
 
 (def proj-root
   (os/cwd))
 
 (def src-root
-  (path/join proj-root "janet-peg-grammar"))
+  (path/join proj-root "janet-peg"))
 
 (declare-source
  :source [(path/join src-root "grammar.janet")])
