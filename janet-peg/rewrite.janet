@@ -2,25 +2,25 @@
 
 (def jg-capture-ast
   # jg is a struct, need something mutable
-  (let [ja (table ;(kvs jg))]
+  (let [jca (table ;(kvs jg))]
     # override things that need to be captured
     (each kwd [:buffer :comment :constant :keyword :long_buffer
                :long_string :number :string :symbol :whitespace]
-          (put ja kwd
-               ~(cmt (capture ,(in ja kwd))
+          (put jca kwd
+               ~(cmt (capture ,(in jca kwd))
                      ,|[kwd $])))
     (each kwd [:fn :quasiquote :quote :splice :unquote]
-          (put ja kwd
-               ~(cmt (capture ,(in ja kwd))
+          (put jca kwd
+               ~(cmt (capture ,(in jca kwd))
                      ,|[kwd ;(slice $& 0 -2)])))
     (each kwd [:array :bracket_array :bracket_tuple :table :tuple :struct]
-          (put ja kwd
+          (put jca kwd
                (tuple # array needs to be converted
-                 ;(put (array ;(in ja kwd))
-                       2 ~(cmt (capture ,(get-in ja [kwd 2]))
+                 ;(put (array ;(in jca kwd))
+                       2 ~(cmt (capture ,(get-in jca [kwd 2]))
                                ,|[kwd ;(slice $& 0 -2)])))))
     # tried using a table with a peg but had a problem, so use a struct
-    (table/to-struct ja)))
+    (table/to-struct jca)))
 
 (comment
 
