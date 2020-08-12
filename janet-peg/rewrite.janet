@@ -369,50 +369,6 @@
                 (code (ast src)))))
       (print (- (os/time) start)))
 
-    # replace all underscores in keywords with dashes
-    (let [src (slurp (string (os/getenv "HOME")
-                       "/src/janet-peg/janet-peg/rewrite.janet"))
-          nodes (ast src)]
-      (print
-        (code
-          (postwalk |(if (and (= (type $) :tuple)
-                           (= (first $) :keyword)
-                           (string/find "_" (in $ 1)))
-                       (tuple ;(let [arr (array ;$)]
-                                 (put arr 1
-                                   (string/replace-all "_" "-" (in $ 1)))))
-                       $)
-            nodes))))
-
-    (defn dash-keywords
-      [src-path dest-path]
-      (let [src (slurp src-path)
-            nodes (ast src)]
-      (spit dest-path
-        (code
-          (postwalk |(if (and (= (type $) :tuple)
-                           (= (first $) :keyword)
-                           (string/find "_" (in $ 1)))
-                       (tuple ;(let [arr (array ;$)]
-                                 (put arr 1
-                                   (string/replace-all "_" "-" (in $ 1)))))
-                       $)
-            nodes)))))
-
-    (dash-keywords (string (os/getenv "HOME")
-                     "/src/clojure-peg/clojure-peg/experimental.janet")
-      "/tmp/experimental.janet")
-
-    (each filename ["extras.janet"
-                    "grammar.janet"
-                    "rewrite.janet"
-                    "rewrite-with-loc.janet"]
-          (let [file-path (string (os/getenv "HOME")
-                            "/src/clojure-peg/clojure-peg/"
-                            filename)]
-            (dash-keywords file-path
-              (string "/tmp/" filename))))
-
     )
 
   )
