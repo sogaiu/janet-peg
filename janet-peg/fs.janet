@@ -72,7 +72,6 @@
                   "src/janet-repositories")
      |(when (= (path/ext $) ".janet")
         (let [src (slurp $)]
-          (eprint $)
           (when (not= (string src)
                   (rewrite/code (rewrite/ast src)))
             (eprint $)))))
