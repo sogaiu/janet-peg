@@ -369,6 +369,21 @@
                 (code (ast src)))))
       (print (- (os/time) start)))
 
+    # replace all underscores in keywords with dashes
+    (let [src (slurp (string (os/getenv "HOME")
+                       "/src/janet-peg/janet-peg/rewrite.janet"))
+          nodes (ast src)]
+      (print
+        (code
+          (postwalk |(if (and (= (type $) :tuple)
+                           (= (first $) :keyword)
+                           (string/find "_" (in $ 1)))
+                       (tuple ;(let [arr (array ;$)]
+                                 (put arr 1
+                                   (string/replace-all "_" "-" (in $ 1)))))
+                       $)
+            nodes))))
+
     )
 
   )
