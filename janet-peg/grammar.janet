@@ -75,8 +75,8 @@
     :escape (sequence "\\"
                       (choice (set "0efnrtvz\"\\")
                               (sequence "x" [2 :hex])
-                              (sequence "u" [4 :d])
-                              (sequence "U" [6 :d])
+                              (sequence "u" [4 :hex])
+                              (sequence "U" [6 :hex])
                               (error (constant "bad escape"))))
     #
     :hex (range "09" "af" "AF")
