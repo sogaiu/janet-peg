@@ -1,10 +1,10 @@
 (def jg
   ~{:main (any :input)
     #
-    :input (choice :non_form
+    :input (choice :non-form
                    :form)
     #
-    :non_form (choice :whitespace
+    :non-form (choice :whitespace
                       :comment)
     #
     :whitespace (set " \0\f\n\r\t\v")
@@ -12,57 +12,57 @@
     :comment (sequence "#"
                        (any (if-not (set "\r\n") 1)))
     #
-    :form (choice :reader_macro
+    :form (choice :reader-macro
                   :collection
                   :literal)
     #
-    :reader_macro (choice :fn
+    :reader-macro (choice :fn
                           :quasiquote
                           :quote
                           :splice
                           :unquote)
     #
     :fn (sequence "|"
-                  (any :non_form)
+                  (any :non-form)
                   :form)
     #
     :quasiquote (sequence "~"
-                          (any :non_form)
+                          (any :non-form)
                           :form)
     #
     :quote (sequence "'"
-                     (any :non_form)
+                     (any :non-form)
                      :form)
     #
     :splice (sequence ";"
-                      (any :non_form)
+                      (any :non-form)
                       :form)
     #
     :unquote (sequence ","
-                       (any :non_form)
+                       (any :non-form)
                        :form)
     #
     :literal (choice :number
                      :constant
                      :buffer
                      :string
-                     :long_buffer
-                     :long_string
+                     :long-buffer
+                     :long-string
                      :keyword
                      :symbol)
     #
     :collection (choice :array
-                        :bracket_array
+                        :bracket-array
                         :tuple
-                        :bracket_tuple
+                        :bracket-tuple
                         :table
                         :struct)
     #
     :number (drop (cmt
-                   (capture (some :name_char))
+                   (capture (some :name-char))
                    ,scan-number))
     #
-    :name_char (choice (range "09" "AZ" "az" "\x80\xFF")
+    :name-char (choice (range "09" "AZ" "az" "\x80\xFF")
                        (set "!$%&*+-./:<?=>@^_"))
     #
     :constant (choice "false" "nil" "true")
@@ -86,9 +86,9 @@
                                    (if-not "\"" 1)))
                       "\"")
     #
-    :long_string :long_bytes
+    :long-string :long-bytes
     #
-    :long_bytes {:main (drop (sequence :open
+    :long-bytes {:main (drop (sequence :open
                                        (any (if-not :close 1))
                                        :close))
                  :open (capture :delim :n)
@@ -98,13 +98,13 @@
                                        (capture :delim))
                              ,=)}
     #
-    :long_buffer (sequence "@"
-                           :long_bytes)
+    :long-buffer (sequence "@"
+                           :long-bytes)
     #
     :keyword (sequence ":"
-                       (any :name_char))
+                       (any :name-char))
     #
-    :symbol (some :name_char)
+    :symbol (some :name-char)
     #
     :array (sequence "@("
                       (any :input)
@@ -116,12 +116,12 @@
                       (choice ")"
                               (error "")))
     #
-    :bracket_array (sequence "@["
+    :bracket-array (sequence "@["
                              (any :input)
                              (choice "]"
                                      (error "")))
     #
-    :bracket_tuple (sequence "["
+    :bracket-tuple (sequence "["
                              (any :input)
                              (choice "]"
                                      (error "")))

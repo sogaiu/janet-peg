@@ -4,8 +4,8 @@
   # jg is a struct, need something mutable
   (let [jca (table ;(kvs jg))]
     # override things that need to be captured
-    (each kwd [:buffer :comment :constant :keyword :long_buffer
-               :long_string :number :string :symbol :whitespace]
+    (each kwd [:buffer :comment :constant :keyword :long-buffer
+               :long-string :number :string :symbol :whitespace]
           (put jca kwd
                ~(cmt (capture ,(in jca kwd))
                      ,|[kwd $])))
@@ -13,7 +13,7 @@
           (put jca kwd
                ~(cmt (capture ,(in jca kwd))
                      ,|[kwd ;(slice $& 0 -2)])))
-    (each kwd [:array :bracket_array :bracket_tuple :table :tuple :struct]
+    (each kwd [:array :bracket-array :bracket-tuple :table :tuple :struct]
           (put jca kwd
                (tuple # array needs to be converted
                  ;(put (array ;(in jca kwd))
@@ -154,9 +154,9 @@
     (buffer/push-string buf (in ast 1))
     :keyword
     (buffer/push-string buf (in ast 1))
-    :long_buffer
+    :long-buffer
     (buffer/push-string buf (in ast 1))
-    :long_string
+    :long-string
     (buffer/push-string buf (in ast 1))
     :number
     (buffer/push-string buf (in ast 1))
@@ -173,13 +173,13 @@
       (each elt (drop 1 ast)
             (code* elt buf))
       (buffer/push-string buf ")"))
-    :bracket_array
+    :bracket-array
     (do
       (buffer/push-string buf "@[")
       (each elt (drop 1 ast)
             (code* elt buf))
       (buffer/push-string buf "]"))
-    :bracket_tuple
+    :bracket-tuple
     (do
       (buffer/push-string buf "[")
       (each elt (drop 1 ast)
@@ -257,11 +257,11 @@
   # => ":x"
 
   (code
-    [:long_buffer "@```looooong buffer```"])
+    [:long-buffer "@```looooong buffer```"])
   # => "@```looooong buffer```"
 
   (code
-    [:long_string "```longish string```"])
+    [:long-string "```longish string```"])
   # => "```longish string```"
 
   (code
@@ -319,13 +319,13 @@
   # = "@(:a :b)"
 
   (code
-    '(:bracket_array
+    '(:bracket-array
       (:keyword ":a") (:whitespace " ")
       (:keyword ":b")))
   # => "@[:a :b]"
 
   (code
-    '@(:bracket_tuple
+    '@(:bracket-tuple
        (:keyword ":a") (:whitespace " ")
        (:keyword ":b")))
   # => "[:a :b]"
