@@ -37,10 +37,10 @@
  # => @[[:keyword ":a"]]
 
  (peg/match jg-capture-ast "@``i am a long buffer``")
- # => @[[:long_buffer "@``i am a long buffer``"]]
+ # => @[[:long-buffer "@``i am a long buffer``"]]
 
  (peg/match jg-capture-ast "``hello``")
- # => @[[:long_string "``hello``"]]
+ # => @[[:long-string "``hello``"]]
 
  (peg/match jg-capture-ast "8")
  # => @[[:number "8"]]
@@ -79,10 +79,10 @@
  # => '@[(:array (:keyword ":a"))]
 
  (peg/match jg-capture-ast "@[:a]")
- # => '@[(:bracket_array (:keyword ":a"))]
+ # => '@[(:bracket-array (:keyword ":a"))]
 
  (peg/match jg-capture-ast "[:a]")
- # => '@[(:bracket_tuple (:keyword ":a"))]
+ # => '@[(:bracket-tuple (:keyword ":a"))]
 
  (peg/match jg-capture-ast "@{:a 1}")
  ``
