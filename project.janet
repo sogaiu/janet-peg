@@ -1,4 +1,4 @@
-(import ./vendor/path)
+(import ./janet-peg/vendor/path)
 
 (declare-project
  :name "janet-peg"
