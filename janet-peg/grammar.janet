@@ -109,31 +109,31 @@
     :array (sequence "@("
                       (any :input)
                       (choice ")"
-                              (error "")))
+                              (error "missing )")))
     #
     :tuple (sequence "("
                       (any :input)
                       (choice ")"
-                              (error "")))
+                              (error "missing )")))
     #
     :bracket-array (sequence "@["
                              (any :input)
                              (choice "]"
-                                     (error "")))
+                                     (error "missing ]")))
     #
     :bracket-tuple (sequence "["
                              (any :input)
                              (choice "]"
-                                     (error "")))
+                                     (error "missing ]")))
     :table (sequence "@{"
                       (any :input)
                       (choice "}"
-                              (error "")))
+                              (error "missing }")))
     #
     :struct (sequence "{"
                       (any :input)
                       (choice "}"
-                              (error "")))
+                              (error "missing }")))
     })
 
 (comment
