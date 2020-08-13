@@ -22,13 +22,13 @@
  # => @[]
 
  (peg/match jg-one "[:a :b)")
- # ! "match error in range (6:6)"
+ # => nil
 
  (peg/match jg-one "(def a # hi\n 1)")
  # => @[]
 
  (peg/match jg-one "(def a # hi 1)")
- # ! "match error in range (14:14)"
+ # => nil
 
  (peg/match jg-one "[1]")
  # => @[]
@@ -56,11 +56,14 @@
    # jg is a struct, need something mutable
    (table ;(kvs jg))
    # capture recognized bits
-   (put :main '(capture (any :input)))
+   (put :main ~(capture ,(in jg :main)))
    # tried using a table with a peg but had a problem, so use a struct
    table/to-struct))
 
 (comment
+
+ (peg/match jg-capture "")
+ # => nil
 
  (peg/match jg-capture "nil")
  # => @["nil"]
@@ -153,13 +156,13 @@
  # => @["(def a 1)"]
 
  (peg/match jg-capture "[:a :b)")
- # ! "match error in range (6:6)"
+ # => nil
 
  (peg/match jg-capture "(def a # hi\n 1)")
  # => @["(def a # hi\n 1)"]
 
  (peg/match jg-capture "(def a # hi 1)")
- # !
+ # => nil
 
  (peg/match jg-capture "[1]")
  # => @["[1]"]

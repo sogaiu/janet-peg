@@ -1,5 +1,5 @@
 (def jg
-  ~{:main (any :input)
+  ~{:main (some :input)
     #
     :input (choice :non-form
                    :form)
@@ -138,6 +138,9 @@
 
 (comment
 
+ (peg/match jg "")
+ # => nil
+
  (peg/match jg "@\"i am a buffer\"")
  # => @[]
 
@@ -214,10 +217,10 @@
  # => @[]
 
  (peg/match jg "[:a :b)")
- # ! "match error in range (6:6)"
+ # => nil
 
  (peg/match jg "(def a # hi 1)")
- # ! "match error in range (14:14)"
+ # => nil
 
  (peg/match jg "\"\\u001\"")
  # ! "bad escape"
