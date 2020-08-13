@@ -138,91 +138,91 @@
 
 (comment
 
- (peg/match jg "")
- # => nil
+  (peg/match jg "")
+  # => nil
 
- (peg/match jg "@\"i am a buffer\"")
- # => @[]
+  (peg/match jg "@\"i am a buffer\"")
+  # => @[]
 
- (peg/match jg "# hello")
- # => @[]
+  (peg/match jg "# hello")
+  # => @[]
 
- (peg/match jg "nil")
- # => @[]
+  (peg/match jg "nil")
+  # => @[]
 
- (peg/match jg ":a")
- # => @[]
+  (peg/match jg ":a")
+  # => @[]
 
- (peg/match jg "@``i am a long buffer``")
- # => @[]
+  (peg/match jg "@``i am a long buffer``")
+  # => @[]
 
- (peg/match jg "``hello``")
- # => @[]
+  (peg/match jg "``hello``")
+  # => @[]
 
- (peg/match jg "8")
- # => @[]
+  (peg/match jg "8")
+  # => @[]
+ 
+  (peg/match jg "-2.0")
+  # => @[]
 
- (peg/match jg "-2.0")
- # => @[]
+  (peg/match jg "\"\\u0001\"")
+  # => @[]
 
- (peg/match jg "\"\\u0001\"")
- # => @[]
+  (peg/match jg "a")
+  # => @[]
 
- (peg/match jg "a")
- # => @[]
+  (peg/match jg " ")
+  # => @[]
 
- (peg/match jg " ")
- # => @[]
+  (peg/match jg "|(+ $ 2)")
+  # => @[]
 
- (peg/match jg "|(+ $ 2)")
- # => @[]
+  (peg/match jg "~a")
+  # => @[]
 
- (peg/match jg "~a")
- # => @[]
+  (peg/match jg "'a")
+  # => @[]
 
- (peg/match jg "'a")
- # => @[]
+  (peg/match jg ";a")
+  # => @[]
 
- (peg/match jg ";a")
- # => @[]
+  (peg/match jg ",a")
+  # => @[]
 
- (peg/match jg ",a")
- # => @[]
+  (peg/match jg "@(:a)")
+  # => @[]
 
- (peg/match jg "@(:a)")
- # => @[]
+  (peg/match jg "@[:a]")
+  # => @[]
 
- (peg/match jg "@[:a]")
- # => @[]
+  (peg/match jg "[:a]")
+  # => @[]
 
- (peg/match jg "[:a]")
- # => @[]
+  (peg/match jg "[1 2]")
+  # => @[]
 
- (peg/match jg "[1 2]")
- # => @[]
+  (peg/match jg "@{:a 1}")
+  # => @[]
 
- (peg/match jg "@{:a 1}")
- # => @[]
+  (peg/match jg "{:a 1}")
+  # => @[]
 
- (peg/match jg "{:a 1}")
- # => @[]
+  (peg/match jg "(:a)")
+  # => @[]
 
- (peg/match jg "(:a)")
- # => @[]
+  (peg/match jg "(def a 1)")
+  # => @[]
 
- (peg/match jg "(def a 1)")
- # => @[]
+  (peg/match jg "[:a :b] 1")
+  # => @[]
 
- (peg/match jg "[:a :b] 1")
- # => @[]
+  (peg/match jg "[:a :b)")
+  # => nil
 
- (peg/match jg "[:a :b)")
- # => nil
+  (peg/match jg "(def a # hi 1)")
+  # => nil
 
- (peg/match jg "(def a # hi 1)")
- # => nil
-
- (peg/match jg "\"\\u001\"")
- # ! "bad escape"
+  (peg/match jg "\"\\u001\"")
+  # ! "bad escape"
 
  )
