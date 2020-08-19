@@ -24,6 +24,12 @@
 
 (comment
 
+ (peg/match jg-capture-ast ".0")
+ # => @[[:number ".0"]]
+
+ (peg/match jg-capture-ast ".0a")
+ # => @[[:symbol ".0a"]]
+
  (peg/match jg-capture-ast "@\"i am a buffer\"")
  # => @[[:buffer "@\"i am a buffer\""]]
 
