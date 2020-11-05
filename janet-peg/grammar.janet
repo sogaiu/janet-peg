@@ -109,31 +109,31 @@
     :array (sequence "@("
                       (any :input)
                       (choice ")"
-                              (error "missing )")))
+                              (error (constant "missing )"))))
     #
     :tuple (sequence "("
                       (any :input)
                       (choice ")"
-                              (error "missing )")))
+                              (error (constant "missing )"))))
     #
     :bracket-array (sequence "@["
                              (any :input)
                              (choice "]"
-                                     (error "missing ]")))
+                                     (error (constant "missing ]"))))
     #
     :bracket-tuple (sequence "["
                              (any :input)
                              (choice "]"
-                                     (error "missing ]")))
+                                     (error (constant "missing ]"))))
     :table (sequence "@{"
                       (any :input)
                       (choice "}"
-                              (error "missing }")))
+                              (error (constant "missing }"))))
     #
     :struct (sequence "{"
                       (any :input)
                       (choice "}"
-                              (error "missing }")))
+                              (error (constant "missing }"))))
     })
 
 (comment
@@ -217,10 +217,10 @@
   # => @[]
 
   (peg/match jg "[:a :b)")
-  # => nil
+  # ! "missing ]"
 
   (peg/match jg "(def a # hi 1)")
-  # => nil
+  # ! "missing )"
 
   (peg/match jg "\"\\u001\"")
   # ! "bad escape"

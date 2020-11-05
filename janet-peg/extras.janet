@@ -22,13 +22,13 @@
  # => @[]
 
  (peg/match jg-one "[:a :b)")
- # => nil
+ # ! "missing ]"
 
  (peg/match jg-one "(def a # hi\n 1)")
  # => @[]
 
  (peg/match jg-one "(def a # hi 1)")
- # => nil
+ # ! "missing )"
 
  (peg/match jg-one "[1]")
  # => @[]
@@ -156,13 +156,13 @@
  # => @["(def a 1)"]
 
  (peg/match jg-capture "[:a :b)")
- # => nil
+ # ! "missing ]"
 
  (peg/match jg-capture "(def a # hi\n 1)")
  # => @["(def a # hi\n 1)"]
 
  (peg/match jg-capture "(def a # hi 1)")
- # => nil
+ # ! "missing )"
 
  (peg/match jg-capture "[1]")
  # => @["[1]"]
