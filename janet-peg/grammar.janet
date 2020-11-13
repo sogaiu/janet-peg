@@ -65,7 +65,8 @@
     :name-char (choice (range "09" "AZ" "az" "\x80\xFF")
                        (set "!$%&*+-./:<?=>@^_"))
     #
-    :constant (choice "false" "nil" "true")
+    :constant (sequence (choice "false" "nil" "true")
+                        (not :name-char))
     #
     :buffer (sequence "@\""
                       (any (choice :escape

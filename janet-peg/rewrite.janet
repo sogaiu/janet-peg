@@ -42,6 +42,21 @@
  (peg/match jg-capture-ast "nil")
  # => @[[:constant "nil"]]
 
+ (peg/match jg-capture-ast "nil?")
+ # => @[[:symbol "nil?"]]
+
+ (peg/match jg-capture-ast "true")
+ # => @[[:constant "true"]]
+
+ (peg/match jg-capture-ast "true?")
+ # => @[[:symbol "true?"]]
+
+ (peg/match jg-capture-ast "false")
+ # => @[[:constant "false"]]
+
+ (peg/match jg-capture-ast "false?")
+ # => @[[:symbol "false?"]]
+
  (peg/match jg-capture-ast ":a")
  # => @[[:keyword ":a"]]
 
