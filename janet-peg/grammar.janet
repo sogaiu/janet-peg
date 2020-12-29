@@ -108,9 +108,9 @@
     :symbol (some :name-char)
     #
     :array (sequence "@("
-                      (any :input)
-                      (choice ")"
-                              (error (constant "missing )"))))
+                     (any :input)
+                     (choice ")"
+                             (error (constant "missing )"))))
     #
     :tuple (sequence "("
                       (any :input)
