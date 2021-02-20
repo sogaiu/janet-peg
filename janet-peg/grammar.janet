@@ -162,7 +162,7 @@
 
   (peg/match jg "8")
   # => @[]
- 
+
   (peg/match jg "-2.0")
   # => @[]
 
@@ -217,13 +217,19 @@
   (peg/match jg "[:a :b] 1")
   # => @[]
 
-  (peg/match jg "[:a :b)")
-  # ! "missing ]"
+  (try
+    (peg/match jg "[:a :b)")
+    ([e] e))
+  # => "missing ]"
 
-  (peg/match jg "(def a # hi 1)")
-  # ! "missing )"
+  (try
+    (peg/match jg "(def a # hi 1)")
+    ([e] e))
+  # => "missing )"
 
-  (peg/match jg "\"\\u001\"")
-  # ! "bad escape"
+  (try
+    (peg/match jg "\"\\u001\"")
+    ([e] e))
+  # => "bad escape"
 
- )
+  )
