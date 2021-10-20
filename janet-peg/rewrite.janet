@@ -6,143 +6,153 @@
     # override things that need to be captured
     (each kwd [:buffer :comment :constant :keyword :long-buffer
                :long-string :number :string :symbol :whitespace]
-          (put jca kwd
+      (put jca kwd
                ~(cmt (capture ,(in jca kwd))
                      ,|[kwd $])))
     (each kwd [:fn :quasiquote :quote :splice :unquote]
-          (put jca kwd
+      (put jca kwd
                ~(cmt (capture ,(in jca kwd))
                      ,|[kwd ;(slice $& 0 -2)])))
     (each kwd [:array :bracket-array :bracket-tuple :table :tuple :struct]
-          (put jca kwd
-               (tuple # array needs to be converted
-                 ;(put (array ;(in jca kwd))
-                       2 ~(cmt (capture ,(get-in jca [kwd 2]))
-                               ,|[kwd ;(slice $& 0 -2)])))))
+      (put jca kwd
+           (tuple # array needs to be converted
+                  ;(put (array ;(in jca kwd))
+                        2 ~(cmt (capture ,(get-in jca [kwd 2]))
+                                ,|[kwd ;(slice $& 0 -2)])))))
     # tried using a table with a peg but had a problem, so use a struct
     (table/to-struct jca)))
 
 (comment
 
- (peg/match jg-capture-ast ".0")
- # => @[[:number ".0"]]
+  (peg/match jg-capture-ast ".0")
+  # => @[[:number ".0"]]
 
- (peg/match jg-capture-ast ".0a")
- # => @[[:symbol ".0a"]]
+  (peg/match jg-capture-ast ".0a")
+  # => @[[:symbol ".0a"]]
 
- (peg/match jg-capture-ast "foo:bar")
- # => @[[:symbol "foo:bar"]]
+  (peg/match jg-capture-ast "foo:bar")
+  # => @[[:symbol "foo:bar"]]
 
- (peg/match jg-capture-ast "@\"i am a buffer\"")
- # => @[[:buffer "@\"i am a buffer\""]]
+  (peg/match jg-capture-ast "@\"i am a buffer\"")
+  # => @[[:buffer "@\"i am a buffer\""]]
 
- (peg/match jg-capture-ast "# hello")
- # => @[[:comment "# hello"]]
+  (peg/match jg-capture-ast "# hello")
+  # => @[[:comment "# hello"]]
 
- (peg/match jg-capture-ast "nil")
- # => @[[:constant "nil"]]
+  (peg/match jg-capture-ast "nil")
+  # => @[[:constant "nil"]]
 
- (peg/match jg-capture-ast "nil?")
- # => @[[:symbol "nil?"]]
+  (peg/match jg-capture-ast "nil?")
+  # => @[[:symbol "nil?"]]
 
- (peg/match jg-capture-ast "true")
- # => @[[:constant "true"]]
+  (peg/match jg-capture-ast "true")
+  # => @[[:constant "true"]]
 
- (peg/match jg-capture-ast "true?")
- # => @[[:symbol "true?"]]
+  (peg/match jg-capture-ast "true?")
+  # => @[[:symbol "true?"]]
 
- (peg/match jg-capture-ast "false")
- # => @[[:constant "false"]]
+  (peg/match jg-capture-ast "false")
+  # => @[[:constant "false"]]
 
- (peg/match jg-capture-ast "false?")
- # => @[[:symbol "false?"]]
+  (peg/match jg-capture-ast "false?")
+  # => @[[:symbol "false?"]]
 
- (peg/match jg-capture-ast ":a")
- # => @[[:keyword ":a"]]
+  (peg/match jg-capture-ast ":a")
+  # => @[[:keyword ":a"]]
 
- (peg/match jg-capture-ast "@``i am a long buffer``")
- # => @[[:long-buffer "@``i am a long buffer``"]]
+  (peg/match jg-capture-ast "@``i am a long buffer``")
+  # => @[[:long-buffer "@``i am a long buffer``"]]
 
- (peg/match jg-capture-ast "``hello``")
- # => @[[:long-string "``hello``"]]
+  (peg/match jg-capture-ast "``hello``")
+  # => @[[:long-string "``hello``"]]
 
- (peg/match jg-capture-ast "8")
- # => @[[:number "8"]]
+  (peg/match jg-capture-ast "8")
+  # => @[[:number "8"]]
 
- (peg/match jg-capture-ast "\"\\u0001\"")
- # => @[[:string "\"\\u0001\""]]
+  (peg/match jg-capture-ast "\"\\u0001\"")
+  # => @[[:string "\"\\u0001\""]]
 
- (peg/match jg-capture-ast "a")
- # => @[[:symbol "a"]]
+  (peg/match jg-capture-ast "a")
+  # => @[[:symbol "a"]]
 
- (peg/match jg-capture-ast " ")
+  (peg/match jg-capture-ast " ")
   # => @[[:whitespace " "]]
 
- (peg/match jg-capture-ast "|(+ $ 2)")
- ``
- '@[(:fn
-     (:tuple
-      (:symbol "+") (:whitespace " ")
-      (:symbol "$") (:whitespace " ")
-      (:number "2")))]
- ``
+  (deep=
+    #
+    (peg/match jg-capture-ast "|(+ $ 2)")
+    #
+    '@[(:fn
+         (:tuple
+           (:symbol "+") (:whitespace " ")
+           (:symbol "$") (:whitespace " ")
+           (:number "2")))])
+  # => true
 
- (peg/match jg-capture-ast "~a")
- # => @[[:quasiquote [:symbol "a"]]]
+  (peg/match jg-capture-ast "~a")
+  # => @[[:quasiquote [:symbol "a"]]]
 
- (peg/match jg-capture-ast "'a")
- # => @[[:quote [:symbol "a"]]]
+  (peg/match jg-capture-ast "'a")
+  # => @[[:quote [:symbol "a"]]]
 
- (peg/match jg-capture-ast ";a")
- # => @[[:splice [:symbol "a"]]]
+  (peg/match jg-capture-ast ";a")
+  # => @[[:splice [:symbol "a"]]]
 
- (peg/match jg-capture-ast ",a")
- # => @[[:unquote [:symbol "a"]]]
+  (peg/match jg-capture-ast ",a")
+  # => @[[:unquote [:symbol "a"]]]
 
- (peg/match jg-capture-ast "@(:a)")
- # => '@[(:array (:keyword ":a"))]
+  (peg/match jg-capture-ast "@(:a)")
+  # => '@[(:array (:keyword ":a"))]
 
- (peg/match jg-capture-ast "@[:a]")
- # => '@[(:bracket-array (:keyword ":a"))]
+  (peg/match jg-capture-ast "@[:a]")
+  # => '@[(:bracket-array (:keyword ":a"))]
 
- (peg/match jg-capture-ast "[:a]")
- # => '@[(:bracket-tuple (:keyword ":a"))]
+  (peg/match jg-capture-ast "[:a]")
+  # => '@[(:bracket-tuple (:keyword ":a"))]
 
- (peg/match jg-capture-ast "@{:a 1}")
- ``
- '@[(:table
-     (:keyword ":a") (:whitespace " ")
-     (:number "1"))]
- ``
+  (deep=
+    #
+    (peg/match jg-capture-ast "@{:a 1}")
+    #
+    '@[(:table
+         (:keyword ":a") (:whitespace " ")
+         (:number "1"))])
+  # => true
 
- (peg/match jg-capture-ast "{:a 1}")
- ``
- '@[(:struct
-    (:keyword ":a") (:whitespace " ")
-    (:number "1"))]
- ``
+  (deep=
+    #
+    (peg/match jg-capture-ast "{:a 1}")
+    #
+    '@[(:struct
+         (:keyword ":a") (:whitespace " ")
+         (:number "1"))])
+  # => true
 
- (peg/match jg-capture-ast "(:a)")
- # => '@[(:tuple (:keyword ":a"))]
+  (peg/match jg-capture-ast "(:a)")
+  # => '@[(:tuple (:keyword ":a"))]
 
- (peg/match jg-capture-ast "(def a 1)")
- ``
- @[[:tuple
-    [:symbol "def"] [:whitespace " "]
-    [:symbol "a"] [:whitespace " "]
-    [:number "1"]]]
- ``
+  (deep=
+    #
+    (peg/match jg-capture-ast "(def a 1)")
+    #
+    '@[[:tuple
+        [:symbol "def"] [:whitespace " "]
+        [:symbol "a"] [:whitespace " "]
+        [:number "1"]]])
+  # => true
 
- (peg/match jg-capture-ast "(def a # hi\n 1)")
- ``
- '@[(:tuple
-     (:symbol "def") (:whitespace " ")
-     (:symbol "a") (:whitespace " ")
-     (:comment "# hi") (:whitespace "\n") (:whitespace " ")
-     (:number "1"))]
- ``
+  (deep=
+    #
+    (peg/match jg-capture-ast "(def a # hi\n 1)")
+    #
+    '@[(:tuple
+         (:symbol "def") (:whitespace " ")
+         (:symbol "a") (:whitespace " ")
+         (:comment "# hi") (:whitespace "\n") (:whitespace " ")
+         (:number "1"))])
+  # => true
 
- )
+  )
 
 (defn ast
   [src]
@@ -152,14 +162,16 @@
 
 (comment
 
-  (ast "(+ 1 1)")
-  ``
-  '@[:code
-     (:tuple
-      (:symbol "+") (:whitespace " ")
-      (:number "1") (:whitespace " ")
-      (:number "1"))]
-  ``
+  (deep=
+    #
+    (ast "(+ 1 1)")
+    #
+    '@[:code
+       (:tuple
+         (:symbol "+") (:whitespace " ")
+         (:number "1") (:whitespace " ")
+         (:number "1"))])
+  # => true
 
   )
 
@@ -168,7 +180,7 @@
   (case (first ast)
     :code
     (each elt (drop 1 ast)
-          (code* elt buf))
+      (code* elt buf))
     #
     :buffer
     (buffer/push-string buf (in ast 1))
@@ -195,64 +207,64 @@
     (do
       (buffer/push-string buf "@(")
       (each elt (drop 1 ast)
-            (code* elt buf))
+        (code* elt buf))
       (buffer/push-string buf ")"))
     :bracket-array
     (do
       (buffer/push-string buf "@[")
       (each elt (drop 1 ast)
-            (code* elt buf))
+        (code* elt buf))
       (buffer/push-string buf "]"))
     :bracket-tuple
     (do
       (buffer/push-string buf "[")
       (each elt (drop 1 ast)
-            (code* elt buf))
+        (code* elt buf))
       (buffer/push-string buf "]"))
     :tuple
     (do
       (buffer/push-string buf "(")
       (each elt (drop 1 ast)
-            (code* elt buf))
+        (code* elt buf))
       (buffer/push-string buf ")"))
     :struct
     (do
       (buffer/push-string buf "{")
       (each elt (drop 1 ast)
-            (code* elt buf))
+        (code* elt buf))
       (buffer/push-string buf "}"))
     :table
     (do
       (buffer/push-string buf "@{")
       (each elt (drop 1 ast)
-            (code* elt buf))
+        (code* elt buf))
       (buffer/push-string buf "}"))
     #
     :fn
     (do
       (buffer/push-string buf "|")
       (each elt (drop 1 ast)
-            (code* elt buf)))
+        (code* elt buf)))
     :quasiquote
     (do
       (buffer/push-string buf "~")
       (each elt (drop 1 ast)
-            (code* elt buf)))
+        (code* elt buf)))
     :quote
     (do
       (buffer/push-string buf "'")
       (each elt (drop 1 ast)
-            (code* elt buf)))
+        (code* elt buf)))
     :splice
     (do
       (buffer/push-string buf ";")
       (each elt (drop 1 ast)
-            (code* elt buf)))
+        (code* elt buf)))
     :unquote
     (do
       (buffer/push-string buf ",")
       (each elt (drop 1 ast)
-            (code* elt buf)))
+        (code* elt buf)))
     ))
 
 (defn code
@@ -302,50 +314,50 @@
 
   (code
     '(:fn
-      (:tuple
-       (:symbol "-") (:whitespace " ")
-       (:symbol "$") (:whitespace " ")
-       (:number "8"))))
+       (:tuple
+         (:symbol "-") (:whitespace " ")
+         (:symbol "$") (:whitespace " ")
+         (:number "8"))))
   # => "|(- $ 8)"
 
   (code
     '(:quasiquote
-      (:tuple
-       (:symbol "/") (:whitespace " ")
-       (:number "1") (:whitespace " ")
-       (:symbol "a"))))
+       (:tuple
+         (:symbol "/") (:whitespace " ")
+         (:number "1") (:whitespace " ")
+         (:symbol "a"))))
   # => "~(/ 1 a)"
 
   (code
     '(:quote
-      (:tuple
-       (:symbol "*") (:whitespace " ")
-       (:number "0") (:whitespace " ")
-       (:symbol "x"))))
+       (:tuple
+         (:symbol "*") (:whitespace " ")
+         (:number "0") (:whitespace " ")
+         (:symbol "x"))))
   # => "'(* 0 x)"
 
   (code
     '(:splice
-      (:tuple
-       (:keyword ":a") (:whitespace " ")
-       (:keyword ":b"))))
+       (:tuple
+         (:keyword ":a") (:whitespace " ")
+         (:keyword ":b"))))
   # => ";(:a :b)"
 
   (code
     '(:unquote
-      (:symbol "a")))
+       (:symbol "a")))
   # => ",a"
 
   (code
     '(:array
-      (:keyword ":a") (:whitespace " ")
-      (:keyword ":b")))
+       (:keyword ":a") (:whitespace " ")
+       (:keyword ":b")))
   # = "@(:a :b)"
 
   (code
     '(:bracket-array
-      (:keyword ":a") (:whitespace " ")
-      (:keyword ":b")))
+       (:keyword ":a") (:whitespace " ")
+       (:keyword ":b")))
   # => "@[:a :b]"
 
   (code
@@ -379,18 +391,18 @@
   (comment
 
     (let [src (slurp (string (os/getenv "HOME")
-                       "/src/janet/src/boot/boot.janet"))]
+                             "/src/janet/src/boot/boot.janet"))]
       (= (string src)
-        (code (ast src))))
+         (code (ast src))))
 
     # 33 ms per
     (let [start (os/time)]
       (each i (range 1000)
-            (let [src
-                  (slurp (string (os/getenv "HOME")
-                           "/src/janet/src/boot/boot.janet"))]
-              (= src
-                (code (ast src)))))
+        (let [src
+              (slurp (string (os/getenv "HOME")
+                             "/src/janet/src/boot/boot.janet"))]
+          (= src
+             (code (ast src)))))
       (print (- (os/time) start)))
 
     )
