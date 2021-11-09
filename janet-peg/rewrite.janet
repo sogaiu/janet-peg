@@ -24,6 +24,9 @@
 
 (comment
 
+  (peg/match jg-capture-ast "")
+  # => nil
+
   (peg/match jg-capture-ast ".0")
   # => @[[:number ".0"]]
 
@@ -156,9 +159,11 @@
 
 (defn ast
   [src]
-  (array/insert
-    (peg/match jg-capture-ast src)
-    0 :code))
+  (def tree
+    (peg/match jg-capture-ast src))
+  (if tree
+    (array/insert tree 0 :code)
+    @[:code]))
 
 (comment
 
@@ -173,107 +178,114 @@
          (:number "1"))])
   # => true
 
+  (ast "")
+  # => @[:code]
+
   )
 
 (defn code*
-  [ast buf]
-  (case (first ast)
+  [an-ast buf]
+  (case (first an-ast)
     :code
-    (each elt (drop 1 ast)
+    (each elt (drop 1 an-ast)
       (code* elt buf))
     #
     :buffer
-    (buffer/push-string buf (in ast 1))
+    (buffer/push-string buf (in an-ast 1))
     :comment
-    (buffer/push-string buf (in ast 1))
+    (buffer/push-string buf (in an-ast 1))
     :constant
-    (buffer/push-string buf (in ast 1))
+    (buffer/push-string buf (in an-ast 1))
     :keyword
-    (buffer/push-string buf (in ast 1))
+    (buffer/push-string buf (in an-ast 1))
     :long-buffer
-    (buffer/push-string buf (in ast 1))
+    (buffer/push-string buf (in an-ast 1))
     :long-string
-    (buffer/push-string buf (in ast 1))
+    (buffer/push-string buf (in an-ast 1))
     :number
-    (buffer/push-string buf (in ast 1))
+    (buffer/push-string buf (in an-ast 1))
     :string
-    (buffer/push-string buf (in ast 1))
+    (buffer/push-string buf (in an-ast 1))
     :symbol
-    (buffer/push-string buf (in ast 1))
+    (buffer/push-string buf (in an-ast 1))
     :whitespace
-    (buffer/push-string buf (in ast 1))
+    (buffer/push-string buf (in an-ast 1))
     #
     :array
     (do
       (buffer/push-string buf "@(")
-      (each elt (drop 1 ast)
+      (each elt (drop 1 an-ast)
         (code* elt buf))
       (buffer/push-string buf ")"))
     :bracket-array
     (do
       (buffer/push-string buf "@[")
-      (each elt (drop 1 ast)
+      (each elt (drop 1 an-ast)
         (code* elt buf))
       (buffer/push-string buf "]"))
     :bracket-tuple
     (do
       (buffer/push-string buf "[")
-      (each elt (drop 1 ast)
+      (each elt (drop 1 an-ast)
         (code* elt buf))
       (buffer/push-string buf "]"))
     :tuple
     (do
       (buffer/push-string buf "(")
-      (each elt (drop 1 ast)
+      (each elt (drop 1 an-ast)
         (code* elt buf))
       (buffer/push-string buf ")"))
     :struct
     (do
       (buffer/push-string buf "{")
-      (each elt (drop 1 ast)
+      (each elt (drop 1 an-ast)
         (code* elt buf))
       (buffer/push-string buf "}"))
     :table
     (do
       (buffer/push-string buf "@{")
-      (each elt (drop 1 ast)
+      (each elt (drop 1 an-ast)
         (code* elt buf))
       (buffer/push-string buf "}"))
     #
     :fn
     (do
       (buffer/push-string buf "|")
-      (each elt (drop 1 ast)
+      (each elt (drop 1 an-ast)
         (code* elt buf)))
     :quasiquote
     (do
       (buffer/push-string buf "~")
-      (each elt (drop 1 ast)
+      (each elt (drop 1 an-ast)
         (code* elt buf)))
     :quote
     (do
       (buffer/push-string buf "'")
-      (each elt (drop 1 ast)
+      (each elt (drop 1 an-ast)
         (code* elt buf)))
     :splice
     (do
       (buffer/push-string buf ";")
-      (each elt (drop 1 ast)
+      (each elt (drop 1 an-ast)
         (code* elt buf)))
     :unquote
     (do
       (buffer/push-string buf ",")
-      (each elt (drop 1 ast)
+      (each elt (drop 1 an-ast)
         (code* elt buf)))
     ))
 
 (defn code
-  [ast]
+  [an-ast]
   (let [buf @""]
-    (code* ast buf)
+    (code* an-ast buf)
     (string buf)))
 
 (comment
+
+  (code
+    [:code])
+  # => ""
 
   (code
     [:code
