@@ -7,7 +7,10 @@
     :non-form (choice :whitespace
                       :comment)
     #
-    :whitespace (set " \0\f\n\r\t\v")
+    :whitespace (choice (some (set " \0\f\t\v"))
+                        (choice "\r\n"
+                                "\r"
+                                "\n"))
     #
     :comment (sequence "#"
                        (any (if-not (set "\r\n") 1)))

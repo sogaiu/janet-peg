@@ -400,6 +400,15 @@
 
 (comment
 
+  (let [src "{:x  :y \n :z  [:a  :b    :c]}"]
+    (deep= (code (ast src))
+           src))
+  # => true
+
+  )
+
+(comment
+
   (comment
 
     (let [src (slurp (string (os/getenv "HOME")
