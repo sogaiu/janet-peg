@@ -4,8 +4,8 @@
 
 (defn zip
   ``
-  Returns a zipper location (zloc or z-location) for a tree representing
-  Janet code.
+  Returns a zipper location (zloc or z-location) for a tree
+  representing Janet code.
   ``
   [tree]
   [tree nil])
@@ -30,6 +30,10 @@
   )
 
 (defn has-children?
+  ``
+  Returns true if `node` can have children.
+  Returns false if `node` cannot have children.
+  ``
   [node]
   (when-let [[head] node]
     (truthy? (get {:code true
@@ -85,7 +89,7 @@
 
 (defn children
   ``
-  If node at `zloc` is a branch, returns the children.
+  Returns children for a branch node at `zloc`.
   Otherwise throws an error.
   ``
   [zloc]
@@ -164,8 +168,8 @@
 
 (defn zip-down
   ``
-  Convenience function that returns a zipper where the
-  (nearly inevitable) initial call to `down` has been called.
+  Convenience function that returns a zipper which has
+  already had `down` called on it.
   ``
   [tree]
   (-> (zip tree)
@@ -190,7 +194,7 @@
   )
 
 (defn state
-  "Returns the state for the given z-location."
+  "Returns the state for `zloc`."
   [zloc]
   (zloc 1))
 
@@ -234,6 +238,10 @@
   )
 
 (defn right
+  ``
+  Returns the z-location of the right sibling of the node
+  at `zloc`, or nil if there is no such sibling.
+  ``
   [zloc]
   (let [[node st] zloc
         {:ls ls :rs rs} (or st @{})
@@ -258,6 +266,12 @@
   )
 
 (defn right-until
+  ``
+  Try to move right from `zloc`, calling `pred` for each
+  right sibling.  If the `pred` call has a truthy result,
+  return the corresponding right sibling.
+  Otherwise, return nil.
+  ``
   [zloc pred]
   (when-let [right-sib (right zloc)]
     (if (pred right-sib)
@@ -292,6 +306,10 @@
 
 # wsc == whitespace, comment
 (defn right-skip-wsc
+  ``
+  Try to move right from `zloc`, skipping over whitespace
+  and comment nodes. XXX
+  ``
   [zloc]
   (right-until zloc
                |(match (node $)
@@ -321,6 +339,10 @@
   )
 
 (defn left
+  ``
+  Returns the z-location of the left sibling of the node
+  at `zloc`, or nil if there is no such sibling.
+  ``
   [zloc]
   (let [[node st] zloc
         {:ls ls :rs rs} (or st @{})]
@@ -411,7 +433,11 @@
 
   )
 
+# XXX: doesn't use `zloc` parameter
 (defn make-node
+  ``
+  Returns a branch node, given `node` and `children`.
+  ``
   [zloc node children]
   [(first node) ;children])
 
@@ -443,7 +469,7 @@
 (defn up
   ``
   Moves up the tree, returning the parent z-location of `zloc`,
-  or nil if at the root.
+  or nil if at the root z-location.
   ``
   [zloc]
   (let [[node st] zloc
@@ -580,8 +606,9 @@
 
 (defn rightmost
   ``
-  Returns the location of the rightmost sibling of the node at
-  `zloc`, or the current node if there are none to the right.
+  Returns the z-location of the rightmost sibling of the node at
+  `zloc`, or the current node's z-location if there are none to the
+  right.
   ``
   [zloc]
   (let [[node st] zloc
@@ -679,6 +706,12 @@
   )
 
 (defn search
+  ``
+  Successively call `pred` on z-locations starting at `zloc`
+  in depth-first order.  If a call to `pred` returns a
+  truthy value, return the corresponding z-location.
+  Otherwise, return nil.
+  ``
   [zloc pred]
   (when-let [next-zloc (df-next zloc)]
     (if (pred next-zloc)
@@ -859,6 +892,7 @@
 # XXX: haven't yet had a use for things below here
 
 (defn lefts
+  "Returns the siblings to the left of `zloc`."
   [zloc]
   (if-let [st (state zloc)
            ls (st :ls)]
@@ -904,7 +938,7 @@
   )
 
 (defn rights
-  "Returns the sequence of siblings to the right of `zloc`."
+  "Returns the siblings to the right of `zloc`."
   [zloc]
   (when-let [st (state zloc)]
     (st :rs)))
@@ -949,8 +983,8 @@
 
 (defn leftmost
   ``
-  Returns the location of the leftmost sibling of the node at `zloc`,
-  or the current node if there are no siblings to the left.
+  Returns the z-location of the leftmost sibling of the node at `zloc`,
+  or the current node's z-location if there are no siblings to the left.
   ``
   [zloc]
   (let [[node st] zloc
@@ -997,7 +1031,7 @@
   )
 
 (defn path
-  "Returns the sequence of nodes that lead to this location."
+  "Returns the path of nodes that lead to `zloc` from the root node."
   [zloc]
   (when-let [st (state zloc)]
     (st :pnodes)))
@@ -1098,7 +1132,7 @@
 
 (defn df-prev
   ``
-  Moves to the previous location in the hierarchy, depth-first.
+  Moves to the previous z-location in the hierarchy, depth-first.
   If already at the root, returns nil.
   ``
   [zloc]
