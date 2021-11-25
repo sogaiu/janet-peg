@@ -287,7 +287,6 @@
                       [:whitespace _]
                       false
                       #
-                      [n-type _]
                       true))
       z/node)
   # => [:number "2"]
@@ -311,7 +310,6 @@
                       [:whitespace _]
                       false
                       #
-                      [n-type _]
                       true))
       z/down
       (z/right-until |(match (z/node $)
@@ -321,7 +319,6 @@
                       [:whitespace _]
                       false
                       #
-                      [n-type _]
                       true))
       z/node)
   # => [:number "2"]
@@ -349,20 +346,73 @@
       z/node)
   # => [:number "2"]
 
+  (-> "(defn my-fn [] (+ x 1))"
+      r/ast
+      z/zip-down
+      z/down
+      z/right-skip-wsc
+      z/right-skip-wsc
+      # XXX: moving down into [] yields nil...
+      (z/insert-child [:symbol "x"])
+      z/root
+      r/code)
+  # => "(defn my-fn [x] (+ x 1))"
+
   )
 
 # left-until
 (comment
+
+  (-> (r/ast
+        ``
+        {:a "hey"
+         :b "see"
+         :c "spot"
+         :x "sit"
+         :y "!?"}
+        ``)
+      z/zip-down
+      z/down
+      z/rightmost
+      (z/left-until |(match (z/node $)
+                       [:string]
+                       true))
+      z/node)
+  # => [:string `"sit"`]
 
   )
 
 # left-skip-wsc
 (comment
 
+  (-> (r/ast
+        ``
+        [:alice :bob
+         :carol :dan
+         :eve :frank
+         :grace :heidi
+         # fine comment
+         :ivan :judy]
+        ``)
+      z/zip-down
+      z/down
+      z/rightmost
+      z/left-skip-wsc
+      z/left-skip-wsc
+      z/node)
+  # => [:keyword ":heidi"]
+
   )
 
 # make-node
 (comment
+
+  # users of make-node:
+  #
+  # * up
+  # * remove
+  # * append-child
+  # * insert-child
 
   )
 
@@ -600,9 +650,7 @@
       z/down
       (z/search |(match (z/node $)
                    [:bracket-tuple [:symbol "x"]]
-                   true
-                   #
-                   false))
+                   true))
       z/down
       (z/insert-right [:symbol "y"])
       (z/insert-right [:whitespace " "])
@@ -640,5 +688,105 @@
         (z/insert-left [:keyword ":oops"]))
     ([e] e))
   # => "Called `insert-left` at root"
+
+  )
+
+# lefts
+(comment
+
+  (deep=
+    #
+    (-> "(+ (- 8 1) 2)"
+        r/ast
+        z/zip-down
+        z/down
+        z/right-skip-wsc
+        z/down
+        z/rightmost # 1
+        z/lefts)
+    #
+    '[(:symbol "-") (:whitespace " ")
+      (:number "8") (:whitespace " ")])
+  # => true
+
+  )
+
+# rights
+(comment
+
+  (deep=
+    #
+    (-> "(+ (- 8 1) 2)"
+        r/ast
+        z/zip-down
+        z/down
+        z/right-skip-wsc
+        z/down
+        z/rights)
+    #
+    '[(:whitespace " ")
+      (:number "8") (:whitespace " ")
+      (:number "1")])
+  # => true
+
+  )
+
+# leftmost
+(comment
+
+  (-> "(+ 1 2)"
+      r/ast
+      z/zip-down
+      z/down
+      z/rightmost
+      z/leftmost
+      z/node)
+  # => [:symbol "+"]
+
+  (-> "(+ (* 8 9) 2)"
+      r/ast
+      z/zip-down
+      z/down
+      z/right-skip-wsc
+      z/down
+      z/leftmost
+      z/node)
+  # => [:symbol "*"]
+
+  )
+
+# path
+(comment
+
+  (deep=
+    #
+    (-> "(+ (/ 3 8) 2)"
+        r/ast
+        z/zip-down
+        z/down
+        z/right-skip-wsc
+        z/down
+        z/path)
+    #
+    '(@[:code
+        (:tuple
+          (:symbol "+") (:whitespace " ")
+          (:tuple
+            (:symbol "/") (:whitespace " ")
+            (:number "3") (:whitespace " ")
+            (:number "8"))
+          (:whitespace " ") (:number "2"))]
+       (:tuple
+         (:symbol "+") (:whitespace " ")
+         (:tuple
+           (:symbol "/") (:whitespace " ")
+           (:number "3") (:whitespace " ")
+           (:number "8"))
+         (:whitespace " ") (:number "2"))
+       (:tuple
+         (:symbol "/") (:whitespace " ")
+         (:number "3") (:whitespace " ")
+         (:number "8"))))
+  # => true
 
   )
