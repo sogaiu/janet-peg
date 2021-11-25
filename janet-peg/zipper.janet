@@ -164,6 +164,14 @@
       node)
   # => [:number "1"]
 
+  (try
+    (-> @[:code [:keyword :smile]]
+        zip
+        down
+        children)
+    ([e] e))
+  # => "Called `children` on a non-branch zloc"
+
   )
 
 (defn zip-down
@@ -518,7 +526,7 @@
 
   )
 
-# XXX: only used by `root` and `df-next`?
+# XXX: used by `root` and `df-next`
 (defn end?
   "Returns true if `zloc` represents the end of a depth-first walk."
   [zloc]
@@ -676,7 +684,10 @@
   )
 
 (defn edit
-  "Replaces the node at `zloc` with the value of `(f node args)`."
+  ``
+  Replaces the node at `zloc` with the value of `(f node args)`,
+  where `node` is the node associated with `zloc`.
+  ``
   [zloc f & args]
   (replace zloc
            (apply f (node zloc) args)))
@@ -767,7 +778,9 @@
                 (merge st {:ls (s/butlast ls)
                            :changed? true})])
         [(make-node zloc (last pnodes) rs)
-         (and pstate (merge pstate {:changed? true}))])
+         (and pstate
+              (merge pstate
+                     {:changed? true}))])
       (error "Called `remove` at root"))))
 
 (comment
@@ -789,18 +802,25 @@
       r/code)
   # => "(+ 1 2)"
 
+  (try
+    (-> [:code [:keyword ":top"]]
+        zip
+        remove)
+    ([e] e))
+  # => "Called `remove` at root"
+
   )
 
 (defn append-child
   ``
-  Appends `item` as the rightmost child of the node at `zloc`,
+  Appends `child` as the rightmost child of the node at `zloc`,
   without moving.
   ``
-  [zloc item]
+  [zloc child]
   (replace zloc
            (make-node zloc
                       (node zloc)
-                      [;(children zloc) item])))
+                      [;(children zloc) child])))
 
 (comment
 
@@ -822,16 +842,16 @@
 
 (defn insert-right
   ``
-  Inserts `item` as the right sibling of the node at `zloc`,
+  Inserts `a-node` as the right sibling of the node at `zloc`,
   without moving.
   Throws an error if called at the root z-location.
   ``
-  [zloc item]
+  [zloc a-node]
   (let [[node st] zloc
         {:rs rs} (or st @{})]
     (if st
       [node
-       (merge st {:rs [item ;rs]
+       (merge st {:rs [a-node ;rs]
                   :changed? true})]
       (error "Called `insert-right` at root"))))
 
@@ -853,20 +873,27 @@
       r/code)
   # => "(+ 1 2)"
 
+  (try
+    (-> [:code [:keyword ":top"]]
+        zip
+        (insert-right [:whitespace " "]))
+    ([e] e))
+  # => "Called `insert-right` at root"
+
   )
 
 (defn insert-left
   ``
-  Inserts `item` as the left sibling of the node at `zloc`,
+  Inserts `a-node` as the left sibling of the node at `zloc`,
   without moving.
   Throws an error if called at the root z-location.
   ``
-  [zloc item]
+  [zloc a-node]
   (let [[node st] zloc
         {:ls ls} (or st @{})]
     (if st
       [node
-       (merge st {:ls (s/tuple-push ls item)
+       (merge st {:ls (s/tuple-push ls a-node)
                   :changed? true})]
       (error "Called `insert-left` at root"))))
 
@@ -887,9 +914,45 @@
       r/code)
   # => "(+ 2 1)"
 
+  (try
+    (-> [:code [:keyword ":top"]]
+        zip
+        (insert-left [:whitespace " "]))
+    ([e] e))
+  # => "Called `insert-left` at root"
+
   )
 
 # XXX: haven't yet had a use for things below here
+
+(defn rights
+  "Returns the siblings to the right of `zloc`."
+  [zloc]
+  (when-let [st (state zloc)]
+    (st :rs)))
+
+(comment
+
+  (-> [:code
+       [:tuple
+        [:symbol "+"] [:whitespace " "]
+        [:number "1"]]]
+      zip-down
+      down
+      rights)
+  # => [[:whitespace " "] [:number "1"]]
+
+  (import ./rewrite :as r)
+
+  (-> "(+ 1 2)"
+      r/ast
+      zip-down
+      down
+      rightmost
+      rights)
+  # => []
+
+  )
 
 (defn lefts
   "Returns the siblings to the left of `zloc`."
@@ -920,65 +983,6 @@
       lefts)
   # => []
 
-  (deep=
-    #
-    (-> "(+ (- 8 1) 2)"
-        r/ast
-        zip-down
-        down
-        right-skip-wsc
-        down
-        rightmost # 1
-        lefts)
-    #
-    '[(:symbol "-") (:whitespace " ")
-      (:number "8") (:whitespace " ")])
-  # => true
-
-  )
-
-(defn rights
-  "Returns the siblings to the right of `zloc`."
-  [zloc]
-  (when-let [st (state zloc)]
-    (st :rs)))
-
-(comment
-
-  (-> [:code
-       [:tuple
-        [:symbol "+"] [:whitespace " "]
-        [:number "1"]]]
-      zip-down
-      down
-      rights)
-  # => [[:whitespace " "] [:number "1"]]
-
-  (import ./rewrite :as r)
-
-  (-> "(+ 1 2)"
-      r/ast
-      zip-down
-      down
-      rightmost
-      rights)
-  # => []
-
-  (deep=
-    #
-    (-> "(+ (- 8 1) 2)"
-        r/ast
-        zip-down
-        down
-        right-skip-wsc
-        down
-        rights)
-    #
-    '[(:whitespace " ")
-      (:number "8") (:whitespace " ")
-      (:number "1")])
-  # => true
-
   )
 
 (defn leftmost
@@ -1008,25 +1012,6 @@
       leftmost
       node)
   # => [:symbol "+"]
-
-  (-> "(+ 1 2)"
-      r/ast
-      zip-down
-      down
-      rightmost
-      leftmost
-      node)
-  # => [:symbol "+"]
-
-  (-> "(+ (* 8 9) 2)"
-      r/ast
-      zip-down
-      down
-      right-skip-wsc
-      down
-      leftmost
-      node)
-  # => [:symbol "*"]
 
   )
 
@@ -1060,49 +1045,18 @@
           (:number "2"))]))
   # => true
 
-  (deep=
-    #
-    (-> "(+ (/ 3 8) 2)"
-        r/ast
-        zip-down
-        down
-        right-skip-wsc
-        down
-        path)
-    #
-    '(@[:code
-        (:tuple
-          (:symbol "+") (:whitespace " ")
-          (:tuple
-            (:symbol "/") (:whitespace " ")
-            (:number "3") (:whitespace " ")
-            (:number "8"))
-          (:whitespace " ") (:number "2"))]
-       (:tuple
-         (:symbol "+") (:whitespace " ")
-         (:tuple
-           (:symbol "/") (:whitespace " ")
-           (:number "3") (:whitespace " ")
-           (:number "8"))
-         (:whitespace " ") (:number "2"))
-       (:tuple
-         (:symbol "/") (:whitespace " ")
-         (:number "3") (:whitespace " ")
-         (:number "8"))))
-  # => true
-
   )
 
 (defn insert-child
   ``
-  Inserts `item` as the leftmost child of the node at `zloc`,
+  Inserts `child` as the leftmost child of the node at `zloc`,
   without moving.
   ``
-  [zloc item]
+  [zloc child]
   (replace zloc
            (make-node zloc
                       (node zloc)
-                      [item ;(children zloc)])))
+                      [child ;(children zloc)])))
 
 (comment
 
@@ -1132,7 +1086,7 @@
 
 (defn df-prev
   ``
-  Moves to the previous z-location in the hierarchy, depth-first.
+  Moves to the previous z-location, depth-first.
   If already at the root, returns nil.
   ``
   [zloc]
