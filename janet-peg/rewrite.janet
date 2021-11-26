@@ -157,13 +157,25 @@
 
   )
 
+(def jg-capture-top-level-ast
+  # jg is a struct, need something mutable
+  (let [jca (table ;(kvs jg-capture-ast))]
+    (put jca
+         :main ~(sequence :input (position)))
+    # tried using a table with a peg but had a problem, so use a struct
+    (table/to-struct jca)))
+
 (defn ast
-  [src]
-  (def tree
-    (peg/match jg-capture-ast src))
-  (if tree
-    (array/insert tree 0 :code)
-    @[:code]))
+  [src &opt start single]
+  (default start 0)
+  (if single
+    (if-let [[tree position]
+             (peg/match jg-capture-top-level-ast src start)]
+      [tree position]
+      [@[:code] nil])
+    (if-let [tree (peg/match jg-capture-ast src start)]
+      (array/insert tree 0 :code)
+      @[:code])))
 
 (comment
 
@@ -176,6 +188,49 @@
          (:symbol "+") (:whitespace " ")
          (:number "1") (:whitespace " ")
          (:number "1"))])
+  # => true
+
+  (def src
+    ``
+    (+ 1 1)
+
+    (/ 2 3)
+    ``)
+
+  (deep=
+    #
+    (ast src 0 :single)
+    #
+    '((:tuple
+        (:symbol "+") (:whitespace " ")
+        (:number "1") (:whitespace " ")
+        (:number "1"))
+       7))
+  # => true
+
+  (deep=
+    #
+    (ast src 7 :single)
+    #
+    '((:whitespace "\n") 8))
+  # => true
+
+  (deep=
+    #
+    (ast src 8 :single)
+    #
+    '((:whitespace "\n") 9))
+  # => true
+
+  (deep=
+    #
+    (ast src 9 :single)
+    #
+    '((:tuple
+        (:symbol "/") (:whitespace " ")
+        (:number "2") (:whitespace " ")
+        (:number "3"))
+       16))
   # => true
 
   (ast "")
