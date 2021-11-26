@@ -171,7 +171,7 @@
   (if single
     (if-let [[tree position]
              (peg/match jg-capture-top-level-ast src start)]
-      [tree position]
+      [@[:code tree] position]
       [@[:code] nil])
     (if-let [tree (peg/match jg-capture-ast src start)]
       (array/insert tree 0 :code)
@@ -201,10 +201,11 @@
     #
     (ast src 0 :single)
     #
-    '((:tuple
-        (:symbol "+") (:whitespace " ")
-        (:number "1") (:whitespace " ")
-        (:number "1"))
+    '(@[:code
+        (:tuple
+          (:symbol "+") (:whitespace " ")
+          (:number "1") (:whitespace " ")
+          (:number "1"))]
        7))
   # => true
 
@@ -212,24 +213,29 @@
     #
     (ast src 7 :single)
     #
-    '((:whitespace "\n") 8))
+    '(@[:code
+        (:whitespace "\n")]
+       8))
   # => true
 
   (deep=
     #
     (ast src 8 :single)
     #
-    '((:whitespace "\n") 9))
+    '(@[:code
+        (:whitespace "\n")]
+       9))
   # => true
 
   (deep=
     #
     (ast src 9 :single)
     #
-    '((:tuple
-        (:symbol "/") (:whitespace " ")
-        (:number "2") (:whitespace " ")
-        (:number "3"))
+    '(@[:code
+        (:tuple
+          (:symbol "/") (:whitespace " ")
+          (:number "2") (:whitespace " ")
+          (:number "3"))]
        16))
   # => true
 
