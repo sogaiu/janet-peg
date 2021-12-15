@@ -8,7 +8,9 @@
            items))
 
 (def loc-grammar
-  ~{:main (some :input)
+  ~{:main (sequence (line) (column)
+                    (some :input)
+                    (line) (column))
     #
     :input (choice :non-form
                    :form)
@@ -247,65 +249,270 @@
 
 (comment
 
-  (peg/match loc-grammar " ")
-  # => '@[(:whitespace @{:bc 1 :bl 1 :ec 2 :el 1} " ")]
+  (get (peg/match loc-grammar " ") 2)
+  # => '(:whitespace @{:bc 1 :bl 1 :ec 2 :el 1} " ")
 
-  (peg/match loc-grammar "# hi there")
-  # => '@[(:comment @{:bc 1 :bl 1 :ec 11 :el 1} "# hi there")]
+  (get (peg/match loc-grammar "# hi there") 2)
+  # => '(:comment @{:bc 1 :bl 1 :ec 11 :el 1} "# hi there")
 
-  (peg/match loc-grammar "8.3")
-  # => '@[(:number @{:bc 1 :bl 1 :ec 4 :el 1} "8.3")]
+  (get (peg/match loc-grammar "8.3") 2)
+  # => '(:number @{:bc 1 :bl 1 :ec 4 :el 1} "8.3")
 
-  (peg/match loc-grammar "printf")
-  # => '@[(:symbol @{:bc 1 :bl 1 :ec 7 :el 1} "printf")]
+  (get (peg/match loc-grammar "printf") 2)
+  # => '(:symbol @{:bc 1 :bl 1 :ec 7 :el 1} "printf")
 
-  (peg/match loc-grammar ":smile")
-  # => '@[(:keyword @{:bc 1 :bl 1 :ec 7 :el 1} ":smile")]
+  (get (peg/match loc-grammar ":smile") 2)
+  # => '(:keyword @{:bc 1 :bl 1 :ec 7 :el 1} ":smile")
 
-  (peg/match loc-grammar `"fun"`)
-  # => '@[(:string @{:bc 1 :bl 1 :ec 6 :el 1} "\"fun\"")]
+  (get (peg/match loc-grammar `"fun"`) 2)
+  # => '(:string @{:bc 1 :bl 1 :ec 6 :el 1} "\"fun\"")
 
-  (peg/match loc-grammar "``long-fun``")
-  # => '@[(:long-string @{:bc 1 :bl 1 :ec 13 :el 1} "``long-fun``")]
+  (get (peg/match loc-grammar "``long-fun``") 2)
+  # => '(:long-string @{:bc 1 :bl 1 :ec 13 :el 1} "``long-fun``")
 
-  (peg/match loc-grammar "@``long-buffer-fun``")
-  # => '@[(:long-buffer @{:bc 1 :bl 1 :ec 21 :el 1} "@``long-buffer-fun``")]
+  (get (peg/match loc-grammar "@``long-buffer-fun``") 2)
+  # => '(:long-buffer @{:bc 1 :bl 1 :ec 21 :el 1} "@``long-buffer-fun``")
 
-  (peg/match loc-grammar `@"a buffer"`)
-  # => '@[(:buffer @{:bc 1 :bl 1 :ec 12 :el 1} "@\"a buffer\"")]
+  (get (peg/match loc-grammar `@"a buffer"`) 2)
+  # => '(:buffer @{:bc 1 :bl 1 :ec 12 :el 1} "@\"a buffer\"")
 
   (deep=
     #
-    (peg/match loc-grammar "@[8]")
+    (get (peg/match loc-grammar "@[8]") 2)
     #
-    '@[(:bracket-array @{:bc 1 :bl 1
-                         :ec 5 :el 1}
-                       (:number @{:bc 3 :bl 1
-                                  :ec 4 :el 1} "8"))])
+    '(:bracket-array @{:bc 1 :bl 1
+                       :ec 5 :el 1}
+                     (:number @{:bc 3 :bl 1
+                                :ec 4 :el 1} "8")))
   # => true
 
   (deep=
     #
-    (peg/match loc-grammar "@{:a 1}")
+    (get (peg/match loc-grammar "@{:a 1}") 2)
     #
-    '@[(:table @{:bc 1 :bl 1
+    '(:table @{:bc 1 :bl 1
+               :ec 8 :el 1}
+             (:keyword @{:bc 3 :bl 1
+                         :ec 5 :el 1} ":a")
+             (:whitespace @{:bc 5 :bl 1
+                            :ec 6 :el 1} " ")
+             (:number @{:bc 6 :bl 1
+                        :ec 7 :el 1} "1")))
+  # => true
+
+  (deep=
+    #
+    (get (peg/match loc-grammar "~x") 2)
+    #
+    '(:quasiquote @{:bc 1 :bl 1
+                    :ec 3 :el 1}
+                  (:symbol @{:bc 2 :bl 1
+                             :ec 3 :el 1} "x")))
+  # => true
+
+  )
+
+(def loc-top-level-ast
+  (let [ltla (table ;(kvs loc-grammar))]
+    (put ltla
+         :main ~(sequence (line) (column)
+                          :input
+                          (line) (column)))
+    (table/to-struct ltla)))
+
+(defn ast
+  [src &opt start single]
+  (default start 0)
+  (if single
+    (if-let [[bl bc tree el ec]
+             (peg/match loc-top-level-ast src start)]
+      @[:code (make-attrs bl bc el ec) tree]
+      @[:code])
+    (if-let [captures (peg/match loc-grammar src start)]
+      (let [[bl bc] (slice captures 0 2)
+            [el ec] (slice captures -3)
+            trees (array/slice captures 2 -3)]
+        (array/insert trees 0
+                      :code (make-attrs bl bc el ec)))
+      @[:code])))
+
+(comment
+
+  (deep=
+    #
+    (ast "(+ 1 1)")
+    #
+    '@[:code @{:bc 1 :bl 1
+               :ec 8 :el 1}
+       (:tuple @{:bc 1 :bl 1
                  :ec 8 :el 1}
-               (:keyword @{:bc 3 :bl 1
-                           :ec 5 :el 1} ":a")
+               (:symbol @{:bc 2 :bl 1
+                          :ec 3 :el 1} "+")
+               (:whitespace @{:bc 3 :bl 1
+                              :ec 4 :el 1} " ")
+               (:number @{:bc 4 :bl 1
+                          :ec 5 :el 1} "1")
                (:whitespace @{:bc 5 :bl 1
                               :ec 6 :el 1} " ")
                (:number @{:bc 6 :bl 1
                           :ec 7 :el 1} "1"))])
   # => true
 
-  (deep=
+  )
+
+(defn code*
+  [an-ast buf]
+  (case (first an-ast)
+    :code
+    (each elt (drop 2 an-ast)
+      (code* elt buf))
     #
-    (peg/match loc-grammar "~x")
+    :buffer
+    (buffer/push-string buf (in an-ast 2))
+    :comment
+    (buffer/push-string buf (in an-ast 2))
+    :constant
+    (buffer/push-string buf (in an-ast 2))
+    :keyword
+    (buffer/push-string buf (in an-ast 2))
+    :long-buffer
+    (buffer/push-string buf (in an-ast 2))
+    :long-string
+    (buffer/push-string buf (in an-ast 2))
+    :number
+    (buffer/push-string buf (in an-ast 2))
+    :string
+    (buffer/push-string buf (in an-ast 2))
+    :symbol
+    (buffer/push-string buf (in an-ast 2))
+    :whitespace
+    (buffer/push-string buf (in an-ast 2))
     #
-    '@[(:quasiquote @{:bc 1 :bl 1
-                      :ec 3 :el 1}
-                    (:symbol @{:bc 2 :bl 1
-                               :ec 3 :el 1} "x"))])
+    :array
+    (do
+      (buffer/push-string buf "@(")
+      (each elt (drop 2 an-ast)
+        (code* elt buf))
+      (buffer/push-string buf ")"))
+    :bracket-array
+    (do
+      (buffer/push-string buf "@[")
+      (each elt (drop 2 an-ast)
+        (code* elt buf))
+      (buffer/push-string buf "]"))
+    :bracket-tuple
+    (do
+      (buffer/push-string buf "[")
+      (each elt (drop 2 an-ast)
+        (code* elt buf))
+      (buffer/push-string buf "]"))
+    :tuple
+    (do
+      (buffer/push-string buf "(")
+      (each elt (drop 2 an-ast)
+        (code* elt buf))
+      (buffer/push-string buf ")"))
+    :struct
+    (do
+      (buffer/push-string buf "{")
+      (each elt (drop 2 an-ast)
+        (code* elt buf))
+      (buffer/push-string buf "}"))
+    :table
+    (do
+      (buffer/push-string buf "@{")
+      (each elt (drop 2 an-ast)
+        (code* elt buf))
+      (buffer/push-string buf "}"))
+    #
+    :fn
+    (do
+      (buffer/push-string buf "|")
+      (each elt (drop 2 an-ast)
+        (code* elt buf)))
+    :quasiquote
+    (do
+      (buffer/push-string buf "~")
+      (each elt (drop 2 an-ast)
+        (code* elt buf)))
+    :quote
+    (do
+      (buffer/push-string buf "'")
+      (each elt (drop 2 an-ast)
+        (code* elt buf)))
+    :splice
+    (do
+      (buffer/push-string buf ";")
+      (each elt (drop 2 an-ast)
+        (code* elt buf)))
+    :unquote
+    (do
+      (buffer/push-string buf ",")
+      (each elt (drop 2 an-ast)
+        (code* elt buf)))
+    ))
+
+(defn code
+  [an-ast]
+  (let [buf @""]
+    (code* an-ast buf)
+    # XXX: leave as buffer?
+    (string buf)))
+
+(comment
+
+  (code
+    [:code])
+  # => ""
+
+  (code
+    '(:whitespace @{:bc 1 :bl 1
+                    :ec 2 :el 1} " "))
+  # => " "
+
+
+  (code
+    '(:buffer @{:bc 1 :bl 1
+                :ec 12 :el 1} "@\"a buffer\""))
+  # => "@\"a buffer\""
+
+  (code
+    '@[:code @{:bc 1 :bl 1
+               :ec 8 :el 1}
+       (:tuple @{:bc 1 :bl 1
+                 :ec 8 :el 1}
+               (:symbol @{:bc 2 :bl 1
+                          :ec 3 :el 1} "+")
+               (:whitespace @{:bc 3 :bl 1
+                              :ec 4 :el 1} " ")
+               (:number @{:bc 4 :bl 1
+                          :ec 5 :el 1} "1")
+               (:whitespace @{:bc 5 :bl 1
+                              :ec 6 :el 1} " ")
+               (:number @{:bc 6 :bl 1
+                          :ec 7 :el 1} "1"))])
+  # => "(+ 1 1)"
+
+  )
+
+(comment
+
+  (let [src "{:x  :y \n :z  [:a  :b    :c]}"]
+    (deep= (code (ast src))
+           src))
   # => true
+
+  )
+
+(comment
+
+  (comment
+
+    (let [src (slurp (string (os/getenv "HOME")
+                             "/src/janet/src/boot/boot.janet"))]
+      (= (string src)
+         (code (ast src))))
+
+    )
 
   )
