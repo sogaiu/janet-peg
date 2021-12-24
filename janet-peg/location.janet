@@ -135,12 +135,11 @@
     #
     :escape (sequence "\\"
                       (choice (set "0efnrtvz\"\\")
-                              (sequence "x" [2 :hex])
-                              (sequence "u" [4 :hex])
-                              (sequence "U" [6 :hex])
+                              (sequence "x" (2 :h))
+                              (sequence "u" (4 :h))
+                              (sequence "U" (6 :h))
                               (error (constant "bad escape"))))
     #
-    :hex (range "09" "af" "AF")
     #
     :string
     (cmt (sequence (line) (column)
