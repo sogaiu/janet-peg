@@ -7,6 +7,41 @@
   (zipcoll [:bl :bc :el :ec]
            items))
 
+(defn atom-node
+  [node-type peg-form]
+  ~(cmt (capture (sequence (line) (column)
+                           ,peg-form
+                           (line) (column)))
+        ,|[node-type (make-attrs ;(slice $& 0 -2)) (last $&)]))
+
+(defn reader-macro-node
+  [node-type sigil]
+  ~(cmt (capture (sequence (line) (column)
+                           ,sigil
+                           (any :non-form)
+                           :form
+                           (line) (column)))
+        ,|[node-type (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
+           ;(slice $& 2 -4)]))
+
+(defn collection-node
+  [node-type open-delim close-delim]
+  ~(cmt
+     (capture
+       (sequence
+         (line) (column)
+         ,open-delim
+         (any :input)
+         (choice ,close-delim
+                 (error
+                   (replace (sequence (line) (column))
+                            ,|(string/format
+                                "line: %p column: %p missing %p for %p"
+                                $0 $1 close-delim node-type))))
+         (line) (column)))
+     ,|[node-type (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
+        ;(slice $& 2 -4)]))
+
 (def loc-grammar
   ~{:main (sequence (line) (column)
                     (some :input)
@@ -18,120 +53,108 @@
     :non-form (choice :whitespace
                       :comment)
     #
-    :whitespace
-    (cmt (capture (sequence (line) (column)
-                            (choice (some (set " \0\f\t\v"))
-                                    (choice "\r\n"
-                                            "\r"
-                                            "\n"))
-                            (line) (column)))
-         ,|[:whitespace (make-attrs ;(slice $& 0 -2)) (last $&)])
+    :whitespace ,(atom-node :whitespace
+                            '(choice (some (set " \0\f\t\v"))
+                                     (choice "\r\n"
+                                             "\r"
+                                             "\n")))
+    # :whitespace
+    # (cmt (capture (sequence (line) (column)
+    #                         (choice (some (set " \0\f\t\v"))
+    #                                 (choice "\r\n"
+    #                                         "\r"
+    #                                         "\n"))
+    #                         (line) (column)))
+    #      ,|[:whitespace (make-attrs ;(slice $& 0 -2)) (last $&)])
     #
-    :comment
-    (cmt (sequence (line) (column)
-                   (capture (sequence "#"
-                                      (any (if-not (set "\r\n") 1))))
-                   (line) (column))
-         ,|[:comment (make-attrs $0 $1 $3 $4) $2])
+    :comment ,(atom-node :comment
+                         '(sequence "#"
+                                    (any (if-not (set "\r\n") 1))))
     #
-    :form (choice :reader-macro
-                  :collection
-                  :literal)
+    :form (choice # reader macros
+                  :fn
+                  :quasiquote
+                  :quote
+                  :splice
+                  :unquote
+                  # collections
+                  :array
+                  :bracket-array
+                  :tuple
+                  :bracket-tuple
+                  :table
+                  :struct
+                  # atoms
+                  :number
+                  :constant
+                  :buffer
+                  :string
+                  :long-buffer
+                  :long-string
+                  :keyword
+                  :symbol)
     #
-    :reader-macro (choice :fn
-                          :quasiquote
-                          :quote
-                          :splice
-                          :unquote)
+    :fn ,(reader-macro-node :fn "|")
+    # :fn (cmt (capture (sequence (line) (column)
+    #                             "|"
+    #                             (any :non-form)
+    #                             :form
+    #                             (line) (column)))
+    #          ,|[:fn (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
+    #             ;(slice $& 2 -4)])
     #
-    :fn
-    (cmt (capture (sequence (line) (column)
-                            "|"
-                            (any :non-form)
-                            :form
-                            (line) (column)))
-         # $& is the remaining arguments
-         ,|[:fn (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
-            ;(slice $& 2 -4)])
+    :quasiquote ,(reader-macro-node :quasiquote "~")
     #
-    :quasiquote
-    (cmt (capture (sequence (line) (column)
-                            "~"
-                            (any :non-form)
-                            :form
-                            (line) (column)))
-         ,|[:quasiquote (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
-            ;(slice $& 2 -4)])
+    :quote ,(reader-macro-node :quote "'")
     #
-    :quote
-    (cmt (capture (sequence (line) (column)
-                            "'"
-                            (any :non-form)
-                            :form
-                            (line) (column)))
-         ,|[:quote (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
-            ;(slice $& 2 -4)])
+    :splice ,(reader-macro-node :splice ";")
     #
-    :splice
-    (cmt (capture (sequence (line) (column)
-                            ";"
-                            (any :non-form)
-                            :form
-                            (line) (column)))
-         ,|[:splice (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
-            ;(slice $& 2 -4)])
+    :unquote ,(reader-macro-node :unquote ",")
     #
-    :unquote
-    (cmt (capture (sequence (line) (column)
-                            ","
-                            (any :non-form)
-                            :form
-                            (line) (column)))
-         ,|[:unquote (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
-            ;(slice $& 2 -4)])
+    :array ,(collection-node :array "@(" ")")
+    # :array
+    # (cmt
+    #   (capture
+    #     (sequence
+    #       (line) (column)
+    #       "@("
+    #       (any :input)
+    #       (choice ")"
+    #               (error
+    #                 (replace (sequence (line) (column))
+    #                          ,|(string/format
+    #                              "line: %p column: %p missing %p for %p"
+    #                              $0 $1 ")" :array))))
+    #       (line) (column)))
+    #   ,|[:array (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
+    #      ;(slice $& 2 -4)])
     #
-    :literal (choice :number
-                     :constant
-                     :buffer
-                     :string
-                     :long-buffer
-                     :long-string
-                     :keyword
-                     :symbol)
+    :tuple ,(collection-node :tuple "(" ")")
     #
-    :collection (choice :array
-                        :bracket-array
-                        :tuple
-                        :bracket-tuple
-                        :table
-                        :struct)
+    :bracket-array ,(collection-node :bracket-array "@[" "]")
     #
-    :number
-    (cmt (capture (sequence (line) (column)
-                            (drop (cmt
-                                    (capture (some :name-char))
-                                    ,scan-number))
-                            (line) (column)))
-         ,|[:number (make-attrs ;(slice $& 0 -2)) (last $&)])
+    :bracket-tuple ,(collection-node :bracket-tuple "[" "]")
+    #
+    :table ,(collection-node :table "@{" "}")
+    #
+    :struct ,(collection-node :struct "{" "}")
+    #
+    :number ,(atom-node :number
+                        ~(drop (cmt
+                                 (capture (some :name-char))
+                                 ,scan-number)))
     #
     :name-char (choice (range "09" "AZ" "az" "\x80\xFF")
                        (set "!$%&*+-./:<?=>@^_"))
     #
-    :constant
-    (cmt (capture (sequence (line) (column)
-                            (choice "false" "nil" "true")
-                            (line) (column)
-                            (not :name-char)))
-         ,|[:constant (make-attrs ;(slice $& 0 -2)) (last $&)])
+    :constant ,(atom-node :constant
+                          '(choice "false" "nil" "true"))
     #
-    :buffer
-    (cmt (sequence (line) (column)
-                   (capture (sequence "@\""
-                                      (any (choice :escape
-                                                   (if-not "\"" 1)))
-                                      "\""))
-                   (line) (column))
-         ,|[:buffer (make-attrs $0 $1 $3 $4) $2])
+    :buffer ,(atom-node :buffer
+                        '(sequence `@"`
+                                   (any (choice :escape
+                                                (if-not "\"" 1)))
+                                   `"`))
     #
     :escape (sequence "\\"
                       (choice (set "0efnrtvz\"\\")
@@ -140,21 +163,14 @@
                               (sequence "U" (6 :h))
                               (error (constant "bad escape"))))
     #
+    :string ,(atom-node :string
+                        '(sequence `"`
+                                   (any (choice :escape
+                                                (if-not "\"" 1)))
+                                   `"`))
     #
-    :string
-    (cmt (sequence (line) (column)
-                   (capture (sequence "\""
-                                      (any (choice :escape
-                                                   (if-not "\"" 1)))
-                                      "\""))
-                   (line) (column))
-         ,|[:string (make-attrs $0 $1 $3 $4) $2])
-    #
-    :long-string
-    (cmt (capture (sequence (line) (column)
-                            :long-bytes
-                            (line) (column)))
-         ,|[:long-string (make-attrs ;(slice $& 0 -2)) (last $&)])
+    :long-string ,(atom-node :long-string
+                             :long-bytes)
     #
     :long-bytes {:main (drop (sequence :open
                                        (any (if-not :close 1))
@@ -166,84 +182,15 @@
                                        (capture :delim))
                              ,=)}
     #
-    :long-buffer
-    (cmt (sequence (line) (column)
-                   (capture (sequence "@" :long-bytes))
-                   (line) (column))
-         ,|[:long-buffer (make-attrs $0 $1 $3 $4) $2])
+    :long-buffer ,(atom-node :long-buffer
+                             '(sequence "@" :long-bytes))
     #
-    :keyword
-    (cmt (capture (sequence (line) (column)
-                            ":"
-                            (any :name-char)
-                            (line) (column)))
-         ,|[:keyword (make-attrs ;(slice $& 0 -2)) (last $&)])
+    :keyword ,(atom-node :keyword
+                         '(sequence ":"
+                                    (any :name-char)))
     #
-    :symbol
-    (cmt (capture (sequence (line) (column)
-                            (some :name-char)
-                            (line) (column)))
-         ,|[:symbol (make-attrs ;(slice $& 0 -2)) (last $&)])
-    #
-    :array
-    (cmt (capture (sequence (line) (column)
-                            "@("
-                            (any :input)
-                            (choice ")"
-                                    (error (constant "missing )")))
-                            (line) (column)))
-        ,|[:array (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
-           ;(slice $& 2 -4)])
-    #
-    :tuple
-    (cmt (capture (sequence (line) (column)
-                            "("
-                            (any :input)
-                            (choice ")"
-                                    (error (constant "missing )")))
-                            (line) (column)))
-         ,|[:tuple (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
-            ;(slice $& 2 -4)])
-    #
-    :bracket-array
-    (cmt (capture (sequence (line) (column)
-                            "@["
-                            (any :input)
-                            (choice "]"
-                                    (error (constant "missing ]")))
-                            (line) (column)))
-         ,|[:bracket-array (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
-            ;(slice $& 2 -4)])
-    #
-    :bracket-tuple
-    (cmt (capture (sequence (line) (column)
-                            "["
-                            (any :input)
-                            (choice "]"
-                                    (error (constant "missing ]")))
-                            (line) (column)))
-         ,|[:bracket-tuple (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
-            ;(slice $& 2 -4)])
-    #
-    :table
-    (cmt (capture (sequence (line) (column)
-                            "@{"
-                            (any :input)
-                            (choice "}"
-                                    (error (constant "missing }")))
-                            (line) (column)))
-         ,|[:table (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
-            ;(slice $& 2 -4)])
-    #
-    :struct
-    (cmt (capture (sequence (line) (column)
-                            "{"
-                            (any :input)
-                            (choice "}"
-                                    (error (constant "missing }")))
-                            (line) (column)))
-         ,|[:struct (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
-            ;(slice $& 2 -4)])
+    :symbol ,(atom-node :symbol
+                        '(some :name-char))
     })
 
 (comment
