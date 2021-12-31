@@ -25,48 +25,50 @@
 (comment
 
   (peg/match jg-capture-ast "")
-  # => nil
+  # =>
+  nil
 
   (peg/match jg-capture-ast ".0")
-  # => @[[:number ".0"]]
+  # =>
+  @[[:number ".0"]]
 
   (peg/match jg-capture-ast "@\"i am a buffer\"")
-  # => @[[:buffer "@\"i am a buffer\""]]
+  # =>
+  @[[:buffer "@\"i am a buffer\""]]
 
   (peg/match jg-capture-ast "# hello")
-  # => @[[:comment "# hello"]]
+  # =>
+  @[[:comment "# hello"]]
 
   (peg/match jg-capture-ast ":a")
-  # => @[[:keyword ":a"]]
+  # =>
+  @[[:keyword ":a"]]
 
   (peg/match jg-capture-ast "@``i am a long buffer``")
-  # => @[[:long-buffer "@``i am a long buffer``"]]
+  # =>
+  @[[:long-buffer "@``i am a long buffer``"]]
 
   (peg/match jg-capture-ast "``hello``")
-  # => @[[:long-string "``hello``"]]
+  # =>
+  @[[:long-string "``hello``"]]
 
   (peg/match jg-capture-ast "\"\\u0001\"")
-  # => @[[:string "\"\\u0001\""]]
+  # =>
+  @[[:string "\"\\u0001\""]]
 
-  (deep=
-    #
-    (peg/match jg-capture-ast "|(+ $ 2)")
-    #
-    '@[(:fn
-         (:tuple
-           (:symbol "+") (:whitespace " ")
-           (:symbol "$") (:whitespace " ")
-           (:number "2")))])
-  # => true
+  (peg/match jg-capture-ast "|(+ $ 2)")
+  # =>
+  '@[(:fn
+       (:tuple
+         (:symbol "+") (:whitespace " ")
+         (:symbol "$") (:whitespace " ")
+         (:number "2")))]
 
-  (deep=
-    #
-    (peg/match jg-capture-ast "@{:a 1}")
-    #
-    '@[(:table
-         (:keyword ":a") (:whitespace " ")
-         (:number "1"))])
-  # => true
+  (peg/match jg-capture-ast "@{:a 1}")
+  # =>
+  '@[(:table
+       (:keyword ":a") (:whitespace " ")
+       (:number "1"))]
 
   )
 
@@ -92,16 +94,13 @@
 
 (comment
 
-  (deep=
-    #
-    (ast "(+ 1 1)")
-    #
-    '@[:code
-       (:tuple
-         (:symbol "+") (:whitespace " ")
-         (:number "1") (:whitespace " ")
-         (:number "1"))])
-  # => true
+  (ast "(+ 1 1)")
+  # =>
+  '@[:code
+     (:tuple
+       (:symbol "+") (:whitespace " ")
+       (:number "1") (:whitespace " ")
+       (:number "1"))]
 
   )
 
@@ -207,20 +206,24 @@
 
   (code
     [:code])
-  # => ""
+  # =>
+  ""
 
   (code
     [:code
      [:buffer "@\"buffer me\""]])
-  # => "@\"buffer me\""
+  # =>
+  `@"buffer me"`
 
   (code
     [:comment "# i am a comment"])
-  # => "# i am a comment"
+  # =>
+  "# i am a comment"
 
   (code
     [:long-string "```longish string```"])
-  # => "```longish string```"
+  # =>
+  "```longish string```"
 
   (code
     '(:fn
@@ -228,28 +231,32 @@
          (:symbol "-") (:whitespace " ")
          (:symbol "$") (:whitespace " ")
          (:number "8"))))
-  # => "|(- $ 8)"
+  # =>
+  "|(- $ 8)"
 
   (code
     '(:array
        (:keyword ":a") (:whitespace " ")
        (:keyword ":b")))
-  # = "@(:a :b)"
+  # =
+  "@(:a :b)"
 
   (code
     '@(:struct
        (:keyword ":a") (:whitespace " ")
        (:number "1")))
-  # => "{:a 1}"
+  # =>
+  "{:a 1}"
 
   )
 
 (comment
 
-  (let [src "{:x  :y \n :z  [:a  :b    :c]}"]
-    (deep= (code (ast src))
-           src))
-  # => true
+  (def src "{:x  :y \n :z  [:a  :b    :c]}")
+
+  (code (ast src))
+  # =>
+  src
 
   )
 

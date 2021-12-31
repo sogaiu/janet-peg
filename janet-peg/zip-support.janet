@@ -15,10 +15,12 @@
 (comment
 
   (butlast @[:a :b :c])
-  # => @[:a :b]
+  # =>
+  @[:a :b]
 
   (butlast [:a])
-  # => []
+  # =>
+  []
 
   )
 
@@ -33,10 +35,12 @@
 (comment
 
   (rest [:a :b :c])
-  # => [:b :c]
+  # =>
+  [:b :c]
 
   (rest @[:a])
-  # => @[]
+  # =>
+  @[]
 
   )
 
@@ -50,13 +54,16 @@
 (comment
 
   (tuple-push [:a :b] :c)
-  # => [:a :b :c]
+  # =>
+  [:a :b :c]
 
   (tuple-push nil :a)
-  # => [:a]
+  # =>
+  [:a]
 
   (tuple-push @[] :a)
-  # => [:a]
+  # =>
+  [:a]
 
   )
 
@@ -70,16 +77,20 @@
 (comment
 
   (first-rest-maybe-all [:a :b])
-  # => [:a [:b] [:a :b]]
+  # =>
+  [:a [:b] [:a :b]]
 
   (first-rest-maybe-all @[:a])
-  # => [:a @[] @[:a]]
+  # =>
+  [:a @[] @[:a]]
 
   (first-rest-maybe-all [])
-  # => [nil nil nil]
+  # =>
+  [nil nil nil]
 
   # XXX: is this what we want?
   (first-rest-maybe-all nil)
-  # => [nil nil nil]
+  # =>
+  [nil nil nil]
 
   )

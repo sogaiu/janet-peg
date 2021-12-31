@@ -18,7 +18,13 @@
 
 (comment
 
-  (import ./rewrite :as r)
+  (type (import ./rewrite :as r))
+  # =>
+  :table
+
+  )
+
+(comment
 
   (-> (absorb-right (-> "(+ 1 2) 3"
                         r/ast
@@ -26,7 +32,8 @@
                         z/down))
       z/root
       r/code)
-  # => "(+ 1 2 3)"
+  # =>
+  "(+ 1 2 3)"
 
   )
 
@@ -49,15 +56,14 @@
 
 (comment
 
-  (import ./rewrite :as r)
-
   (-> (eject-right (-> "(+ 1 2 :a)"
                         r/ast
                         z/zip
                         z/down))
       z/root
       r/code)
-  # => "(+ 1 2) :a"
+  # =>
+  "(+ 1 2) :a"
 
   )
 

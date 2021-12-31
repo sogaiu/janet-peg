@@ -61,21 +61,22 @@
 
     )
 
- (path/ext "./fs.janet")
- # => ".janet"
+  (path/ext "./fs.janet")
+  # =>
+  ".janet"
 
- (comment
+  (comment
 
-   (import ./rewrite)
+    (import ./rewrite)
 
-   (visit-files (path/join (os/getenv "HOME")
-                  "src/janet-repositories")
-     |(when (= (path/ext $) ".janet")
-        (let [src (slurp $)]
-          (when (not= (string src)
-                  (rewrite/code (rewrite/ast src)))
-            (eprint $)))))
+    (visit-files (path/join (os/getenv "HOME")
+                            "src/janet-repositories")
+                 |(when (= (path/ext $) ".janet")
+                    (let [src (slurp $)]
+                      (when (not= (string src)
+                                  (rewrite/code (rewrite/ast src)))
+                        (eprint $)))))
 
-   )
+    )
 
  )

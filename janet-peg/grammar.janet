@@ -143,42 +143,53 @@
 (comment
 
   (peg/match jg "")
-  # => nil
+  # =>
+  nil
 
   (peg/match jg "@\"i am a buffer\"")
-  # => @[]
+  # =>
+  @[]
 
   (peg/match jg "# hello")
-  # => @[]
+  # =>
+  @[]
 
   (peg/match jg "``hello``")
-  # => @[]
+  # =>
+  @[]
 
   (peg/match jg "|(+ $ 2)")
-  # => @[]
+  # =>
+  @[]
 
   (peg/match jg "[1 2]")
-  # => @[]
+  # =>
+  @[]
 
   (peg/match jg "@{:a 1}")
-  # => @[]
+  # =>
+  @[]
 
   (peg/match jg "[:a :b] 1")
-  # => @[]
+  # =>
+  @[]
 
   (try
     (peg/match jg "[:a :b)")
     ([e] e))
-  # => "missing ]"
+  # =>
+  "missing ]"
 
   (try
     (peg/match jg "(def a # hi 1)")
     ([e] e))
-  # => "missing )"
+  # =>
+  "missing )"
 
   (try
     (peg/match jg "\"\\u001\"")
     ([e] e))
-  # => "bad escape"
+  # =>
+  "bad escape"
 
   )

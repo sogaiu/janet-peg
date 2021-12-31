@@ -13,7 +13,8 @@
 (comment
 
   (zip @[:code [:number "8"]])
-  # => '(@[:code (:number "8")] nil)
+  # =>
+  '(@[:code (:number "8")] nil)
 
   )
 
@@ -25,7 +26,8 @@
 (comment
 
   (node (zip @[:code [:number "8"]]))
-  # => '@[:code (:number "8")]
+  # =>
+  '@[:code (:number "8")]
 
   )
 
@@ -57,10 +59,12 @@
      [:symbol "+"] [:whitespace " "]
      [:number "1"] [:whitespace " "]
      [:number "2"]])
-  # => true
+  # =>
+  true
 
   (has-children? [:number "8"])
-  # => false
+  # =>
+  false
 
   )
 
@@ -83,7 +87,8 @@
             [:symbol "+"] [:whitespace " "]
             [:number "1"] [:whitespace " "]
             [:number "2"]]]))
-  # => true
+  # =>
+  true
 
   )
 
@@ -99,20 +104,17 @@
 
 (comment
 
-  (deep=
-    #
-    (children
-      (zip @[:code
-             [:tuple
-              [:symbol "+"] [:whitespace " "]
-              [:number "1"] [:whitespace " "]
-              [:number "2"]]]))
-    #
-    '((:tuple
-        [:symbol "+"] [:whitespace " "]
-        (:number "1") (:whitespace " ")
-        (:number "2"))))
-  # => true
+  (children
+    (zip @[:code
+           [:tuple
+            [:symbol "+"] [:whitespace " "]
+            [:number "1"] [:whitespace " "]
+            [:number "2"]]]))
+  # =>
+  '((:tuple
+      [:symbol "+"] [:whitespace " "]
+      (:number "1") (:whitespace " ")
+      (:number "2")))
 
   )
 
@@ -137,22 +139,19 @@
 
 (comment
 
-  (deep=
-    #
-    (-> @[:code
-          [:tuple
-           [:symbol "+"] [:whitespace " "]
-           [:number "1"] [:whitespace " "]
-           [:number "2"]]]
-        zip
-        down
-        node)
-    #
-    '(:tuple
-       (:symbol "+") (:whitespace " ")
-       (:number "1") (:whitespace " ")
-       (:number "2")))
-  # => true
+  (-> @[:code
+        [:tuple
+         [:symbol "+"] [:whitespace " "]
+         [:number "1"] [:whitespace " "]
+         [:number "2"]]]
+      zip
+      down
+      node)
+  # =>
+  '(:tuple
+     (:symbol "+") (:whitespace " ")
+     (:number "1") (:whitespace " ")
+     (:number "2"))
 
   (-> @[:code
         [:bracket-tuple
@@ -162,7 +161,8 @@
       down
       down
       node)
-  # => [:number "1"]
+  # =>
+  [:number "1"]
 
   (try
     (-> @[:code [:keyword :smile]]
@@ -170,7 +170,8 @@
         down
         children)
     ([e] e))
-  # => "Called `children` on a non-branch zloc"
+  # =>
+  "Called `children` on a non-branch zloc"
 
   )
 
@@ -185,19 +186,22 @@
 
 (comment
 
-  (import ./rewrite :as r)
+  (type (import ./rewrite :as r))
+  # =>
+  :table
 
-  (deep=
-    #
-    (-> (r/ast "(+ 1 3)")
-        zip-down
-        node)
-    #
-    '(:tuple
-       (:symbol "+") (:whitespace " ")
-       (:number "1") (:whitespace " ")
-       (:number "3")))
-  # => true
+  )
+
+(comment
+
+  (-> (r/ast "(+ 1 3)")
+      zip-down
+      node)
+  # =>
+  '(:tuple
+     (:symbol "+") (:whitespace " ")
+     (:number "1") (:whitespace " ")
+     (:number "3"))
 
   )
 
@@ -214,34 +218,32 @@
          [:number "2"]]]
       zip
       state)
-  # => nil
+  # =>
+  nil
 
-  (deep=
-    #
-    (-> @[:code
-          [:tuple
-           [:number "1"] [:whitespace " "]
-           [:number "2"]]]
-        zip-down
-        down
-        state)
-    #
-    '@{:ls ()
-       :pnodes (@[:code
-                  (:tuple
-                    (:number "1") (:whitespace " ")
-                    (:number "2"))]
-                 (:tuple
-                   (:number "1") (:whitespace " ")
-                   (:number "2")))
-       :pstate @{:ls ()
-                 :pnodes (@[:code
-                            (:tuple
-                              (:number "1") (:whitespace " ")
-                              (:number "2"))])
-                 :rs ()}
-       :rs ((:whitespace " ") (:number "2"))})
-  # => true
+  (-> @[:code
+        [:tuple
+         [:number "1"] [:whitespace " "]
+         [:number "2"]]]
+      zip-down
+      down
+      state)
+  # =>
+  '@{:ls ()
+     :pnodes (@[:code
+                (:tuple
+                  (:number "1") (:whitespace " ")
+                  (:number "2"))]
+               (:tuple
+                 (:number "1") (:whitespace " ")
+                 (:number "2")))
+     :pstate @{:ls ()
+               :pnodes (@[:code
+                          (:tuple
+                            (:number "1") (:whitespace " ")
+                            (:number "2"))])
+               :rs ()}
+     :rs ((:whitespace " ") (:number "2"))}
 
   )
 
@@ -269,7 +271,8 @@
       right
       right
       node)
-  # => [:number "2"]
+  # =>
+  [:number "2"]
 
   )
 
@@ -308,7 +311,8 @@
                       #
                       true))
       node)
-  # => [:symbol "+"]
+  # =>
+  [:symbol "+"]
 
   )
 
@@ -342,7 +346,8 @@
       down
       right-skip-wsc
       node)
-  # => [:symbol "+"]
+  # =>
+  [:symbol "+"]
 
   )
 
@@ -373,7 +378,8 @@
       left
       left
       node)
-  # => [:number "1"]
+  # =>
+  [:number "1"]
 
   )
 
@@ -406,7 +412,8 @@
                       #
                       true))
       node)
-  # => [:symbol "+"]
+  # =>
+  [:symbol "+"]
 
   )
 
@@ -437,7 +444,8 @@
       right-skip-wsc
       left-skip-wsc
       node)
-  # => [:symbol "+"]
+  # =>
+  [:symbol "+"]
 
   )
 
@@ -457,20 +465,17 @@
       [:number "1"] [:whitespace " "]
       [:number "2"]]])
 
-  (deep=
-    #
-    (make-node (zip r-node)
-               r-node [[:tuple
-                        [:symbol "+"] [:whitespace " "]
-                        [:number "1"] [:whitespace " "]
-                        [:number "2"]]])
-    #
-    '[:code
-      [:tuple
-       [:symbol "+"] [:whitespace " "]
-       [:number "1"] [:whitespace " "]
-       [:number "2"]]])
-  # => true
+  (make-node (zip r-node)
+             r-node [[:tuple
+                      [:symbol "+"] [:whitespace " "]
+                      [:number "1"] [:whitespace " "]
+                      [:number "2"]]])
+  # =>
+  '[:code
+    [:tuple
+     [:symbol "+"] [:whitespace " "]
+     [:number "1"] [:whitespace " "]
+     [:number "2"]]]
 
   )
 
@@ -502,27 +507,27 @@
        [:number "1"] [:whitespace " "]
        [:number "2"]]])
 
-  (deep= code-node
-         (-> code-node
-             zip-down
-             up
-             node))
-  # => true
+  code-node
+  # =>
+  (-> code-node
+      zip-down
+      up
+      node)
 
-  (deep= (zip code-node)
-         (-> code-node
-             zip-down
-             up))
-  # => true
+  (zip code-node)
+  # =>
+  (-> code-node
+      zip-down
+      up)
 
-  (deep= (zip code-node)
-         (-> code-node
-             zip-down
-             down
-             right-skip-wsc
-             up
-             up))
-  # => true
+  (zip code-node)
+  # =>
+  (-> code-node
+      zip-down
+      down
+      right-skip-wsc
+      up
+      up)
 
   )
 
@@ -553,18 +558,15 @@
       [:number "1"] [:whitespace " "]
       [:number "2"]]])
 
-  (deep=
-    #
-    r-node
-    #
-    (-> r-node
-        zip-down
-        down
-        right-skip-wsc
-        left
-        left
-        root))
-  # => true
+  r-node
+  # =>
+  (-> r-node
+      zip-down
+      down
+      right-skip-wsc
+      left
+      left
+      root)
 
   )
 
@@ -599,16 +601,13 @@
   (def r-zip
     (zip r-node))
 
-  (deep=
-    #
-    (-> (df-next r-zip)
-        node)
-    #
-    '(:tuple
-       (:symbol "+") (:whitespace " ")
-       (:number "1") (:whitespace " ")
-       (:number "2")))
-  # => true
+  (-> (df-next r-zip)
+      node)
+  # =>
+  '(:tuple
+     (:symbol "+") (:whitespace " ")
+     (:number "1") (:whitespace " ")
+     (:number "2"))
 
   )
 
@@ -640,7 +639,8 @@
       down
       rightmost
       node)
-  # => [:number "2"]
+  # =>
+  [:number "2"]
 
   (import ./rewrite :as r)
 
@@ -653,7 +653,8 @@
       down
       rightmost
       node)
-  # => [:number "3"]
+  # =>
+  [:number "3"]
 
   )
 
@@ -679,7 +680,8 @@
       (replace [:symbol "-"])
       root
       r/code)
-  # => "(- 1 2)"
+  # =>
+  "(- 1 2)"
 
   )
 
@@ -712,7 +714,8 @@
                             string)]))
       root
       r/code)
-  # => "(+ 2 2)"
+  # =>
+  "(+ 2 2)"
 
   )
 
@@ -747,7 +750,8 @@
                  true))
       right-skip-wsc
       node)
-  # => [:number "1"]
+  # =>
+  [:number "1"]
 
   )
 
@@ -800,14 +804,16 @@
       remove
       root
       r/code)
-  # => "(+ 1 2)"
+  # =>
+  "(+ 1 2)"
 
   (try
     (-> [:code [:keyword ":top"]]
         zip
         remove)
     ([e] e))
-  # => "Called `remove` at root"
+  # =>
+  "Called `remove` at root"
 
   )
 
@@ -836,7 +842,8 @@
       (append-child [:number "3"])
       root
       r/code)
-  # => "(+ 1 2 3)"
+  # =>
+  "(+ 1 2 3)"
 
   )
 
@@ -871,14 +878,16 @@
       (insert-right [:number "2"])
       root
       r/code)
-  # => "(+ 1 2)"
+  # =>
+  "(+ 1 2)"
 
   (try
     (-> [:code [:keyword ":top"]]
         zip
         (insert-right [:whitespace " "]))
     ([e] e))
-  # => "Called `insert-right` at root"
+  # =>
+  "Called `insert-right` at root"
 
   )
 
@@ -912,14 +921,16 @@
       (insert-left [:whitespace " "])
       root
       r/code)
-  # => "(+ 2 1)"
+  # =>
+  "(+ 2 1)"
 
   (try
     (-> [:code [:keyword ":top"]]
         zip
         (insert-left [:whitespace " "]))
     ([e] e))
-  # => "Called `insert-left` at root"
+  # =>
+  "Called `insert-left` at root"
 
   )
 
@@ -940,7 +951,8 @@
       zip-down
       down
       rights)
-  # => [[:whitespace " "] [:number "1"]]
+  # =>
+  [[:whitespace " "] [:number "1"]]
 
   (import ./rewrite :as r)
 
@@ -950,7 +962,8 @@
       down
       rightmost
       rights)
-  # => []
+  # =>
+  []
 
   )
 
@@ -972,7 +985,8 @@
       down
       rightmost
       lefts)
-  # => [[:symbol "+"] [:whitespace " "]]
+  # =>
+  [[:symbol "+"] [:whitespace " "]]
 
   (import ./rewrite :as r)
 
@@ -981,7 +995,8 @@
       zip-down
       down
       lefts)
-  # => []
+  # =>
+  []
 
   )
 
@@ -1011,7 +1026,8 @@
       down
       leftmost
       node)
-  # => [:symbol "+"]
+  # =>
+  [:symbol "+"]
 
   )
 
@@ -1029,21 +1045,19 @@
       r/ast
       zip
       path)
-  # => nil
+  # =>
+  nil
 
-  (deep=
-    #
-    (-> "(+ 1 2)"
-        r/ast
-        zip-down
-        path)
-    #
-    '(@[:code
-        (:tuple
-          (:symbol "+") (:whitespace " ")
-          (:number "1") (:whitespace " ")
-          (:number "2"))]))
-  # => true
+  (-> "(+ 1 2)"
+      r/ast
+      zip-down
+      path)
+  # =>
+  '(@[:code
+      (:tuple
+        (:symbol "+") (:whitespace " ")
+        (:number "1") (:whitespace " ")
+        (:number "2"))])
 
   )
 
@@ -1071,7 +1085,8 @@
       (insert-child [:symbol "+"])
       root
       r/code)
-  # => "(+ 1 2)"
+  # =>
+  "(+ 1 2)"
 
   (-> "(1 2)"
       r/ast
@@ -1080,7 +1095,8 @@
       (insert-child [:symbol "/"])
       root
       r/code)
-  # => "(/ 1 2)"
+  # =>
+  "(/ 1 2)"
 
   )
 
@@ -1109,19 +1125,16 @@
   (def c-ast
     (r/ast "(+ 1 (- 2 8))"))
 
-  (deep=
-    #
-    c-ast
-    #
-    '@[:code
-       [:tuple
-        [:symbol "+"] [:whitespace " "]
-        [:number "1"] [:whitespace " "]
-        [:tuple
-         [:symbol "-"] [:whitespace " "]
-         [:number "2"] [:whitespace " "]
-         [:number "8"]]]])
-  # => true
+  c-ast
+  # =>
+  '@[:code
+     [:tuple
+      [:symbol "+"] [:whitespace " "]
+      [:number "1"] [:whitespace " "]
+      [:tuple
+       [:symbol "-"] [:whitespace " "]
+       [:number "2"] [:whitespace " "]
+       [:number "8"]]]]
 
   (def x-zip
     (zip-down c-ast))
@@ -1131,30 +1144,16 @@
       right
       df-prev
       node)
-  # => [:symbol "+"]
+  # =>
+  [:symbol "+"]
 
   (-> x-zip
       down
       right-skip-wsc
       df-prev
       node)
-  # => [:whitespace " "]
-
-  (deep=
-    #
-    (-> x-zip
-        down
-        right-skip-wsc
-        right-skip-wsc
-        down
-        df-prev
-        node)
-    #
-    '(:tuple
-       (:symbol "-") (:whitespace " ")
-       (:number "2") (:whitespace " ")
-       (:number "8")))
-    # => true
+  # =>
+  [:whitespace " "]
 
   (-> x-zip
       down
@@ -1162,8 +1161,22 @@
       right-skip-wsc
       down
       df-prev
+      node)
+  # =>
+  '(:tuple
+     (:symbol "-") (:whitespace " ")
+     (:number "2") (:whitespace " ")
+     (:number "8"))
+
+  (-> x-zip
+      down
+      right-skip-wsc
+      right-skip-wsc
+      down
+      df-prev
       df-prev
       node)
-  # => [:whitespace " "]
+  # =>
+  [:whitespace " "]
 
   )

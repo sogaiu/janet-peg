@@ -196,65 +196,65 @@
 (comment
 
   (get (peg/match loc-grammar " ") 2)
-  # => '(:whitespace @{:bc 1 :bl 1 :ec 2 :el 1} " ")
+  # =>
+  '(:whitespace @{:bc 1 :bl 1 :ec 2 :el 1} " ")
 
   (get (peg/match loc-grammar "# hi there") 2)
-  # => '(:comment @{:bc 1 :bl 1 :ec 11 :el 1} "# hi there")
+  # =>
+  '(:comment @{:bc 1 :bl 1 :ec 11 :el 1} "# hi there")
 
   (get (peg/match loc-grammar "8.3") 2)
-  # => '(:number @{:bc 1 :bl 1 :ec 4 :el 1} "8.3")
+  # =>
+  '(:number @{:bc 1 :bl 1 :ec 4 :el 1} "8.3")
 
   (get (peg/match loc-grammar "printf") 2)
-  # => '(:symbol @{:bc 1 :bl 1 :ec 7 :el 1} "printf")
+  # =>
+  '(:symbol @{:bc 1 :bl 1 :ec 7 :el 1} "printf")
 
   (get (peg/match loc-grammar ":smile") 2)
-  # => '(:keyword @{:bc 1 :bl 1 :ec 7 :el 1} ":smile")
+  # =>
+  '(:keyword @{:bc 1 :bl 1 :ec 7 :el 1} ":smile")
 
   (get (peg/match loc-grammar `"fun"`) 2)
-  # => '(:string @{:bc 1 :bl 1 :ec 6 :el 1} "\"fun\"")
+  # =>
+  '(:string @{:bc 1 :bl 1 :ec 6 :el 1} "\"fun\"")
 
   (get (peg/match loc-grammar "``long-fun``") 2)
-  # => '(:long-string @{:bc 1 :bl 1 :ec 13 :el 1} "``long-fun``")
+  # =>
+  '(:long-string @{:bc 1 :bl 1 :ec 13 :el 1} "``long-fun``")
 
   (get (peg/match loc-grammar "@``long-buffer-fun``") 2)
-  # => '(:long-buffer @{:bc 1 :bl 1 :ec 21 :el 1} "@``long-buffer-fun``")
+  # =>
+  '(:long-buffer @{:bc 1 :bl 1 :ec 21 :el 1} "@``long-buffer-fun``")
 
   (get (peg/match loc-grammar `@"a buffer"`) 2)
-  # => '(:buffer @{:bc 1 :bl 1 :ec 12 :el 1} "@\"a buffer\"")
+  # =>
+  '(:buffer @{:bc 1 :bl 1 :ec 12 :el 1} "@\"a buffer\"")
 
-  (deep=
-    #
-    (get (peg/match loc-grammar "@[8]") 2)
-    #
-    '(:bracket-array @{:bc 1 :bl 1
-                       :ec 5 :el 1}
-                     (:number @{:bc 3 :bl 1
-                                :ec 4 :el 1} "8")))
-  # => true
+  (get (peg/match loc-grammar "@[8]") 2)
+  # =>
+  '(:bracket-array @{:bc 1 :bl 1
+                     :ec 5 :el 1}
+                   (:number @{:bc 3 :bl 1
+                              :ec 4 :el 1} "8"))
 
-  (deep=
-    #
-    (get (peg/match loc-grammar "@{:a 1}") 2)
-    #
-    '(:table @{:bc 1 :bl 1
-               :ec 8 :el 1}
-             (:keyword @{:bc 3 :bl 1
-                         :ec 5 :el 1} ":a")
-             (:whitespace @{:bc 5 :bl 1
-                            :ec 6 :el 1} " ")
-             (:number @{:bc 6 :bl 1
-                        :ec 7 :el 1} "1")))
-  # => true
+  (get (peg/match loc-grammar "@{:a 1}") 2)
+  # =>
+  '(:table @{:bc 1 :bl 1
+             :ec 8 :el 1}
+           (:keyword @{:bc 3 :bl 1
+                       :ec 5 :el 1} ":a")
+           (:whitespace @{:bc 5 :bl 1
+                          :ec 6 :el 1} " ")
+           (:number @{:bc 6 :bl 1
+                      :ec 7 :el 1} "1"))
 
-  (deep=
-    #
-    (get (peg/match loc-grammar "~x") 2)
-    #
-    '(:quasiquote @{:bc 1 :bl 1
-                    :ec 3 :el 1}
-                  (:symbol @{:bc 2 :bl 1
-                             :ec 3 :el 1} "x")))
-  # => true
+  (get (peg/match loc-grammar "~x") 2)
+  # =>
+  '(:quasiquote @{:bc 1 :bl 1
+                  :ec 3 :el 1}
+                (:symbol @{:bc 2 :bl 1
+                           :ec 3 :el 1} "x"))
 
   )
 
@@ -284,25 +284,22 @@
 
 (comment
 
-  (deep=
-    #
-    (ast "(+ 1 1)")
-    #
-    '@[:code @{:bc 1 :bl 1
+  (ast "(+ 1 1)")
+  # =>
+  '@[:code @{:bc 1 :bl 1
+             :ec 8 :el 1}
+     (:tuple @{:bc 1 :bl 1
                :ec 8 :el 1}
-       (:tuple @{:bc 1 :bl 1
-                 :ec 8 :el 1}
-               (:symbol @{:bc 2 :bl 1
-                          :ec 3 :el 1} "+")
-               (:whitespace @{:bc 3 :bl 1
-                              :ec 4 :el 1} " ")
-               (:number @{:bc 4 :bl 1
-                          :ec 5 :el 1} "1")
-               (:whitespace @{:bc 5 :bl 1
-                              :ec 6 :el 1} " ")
-               (:number @{:bc 6 :bl 1
-                          :ec 7 :el 1} "1"))])
-  # => true
+             (:symbol @{:bc 2 :bl 1
+                        :ec 3 :el 1} "+")
+             (:whitespace @{:bc 3 :bl 1
+                            :ec 4 :el 1} " ")
+             (:number @{:bc 4 :bl 1
+                        :ec 5 :el 1} "1")
+             (:whitespace @{:bc 5 :bl 1
+                            :ec 6 :el 1} " ")
+             (:number @{:bc 6 :bl 1
+                        :ec 7 :el 1} "1"))]
 
   )
 
@@ -409,18 +406,21 @@
 
   (code
     [:code])
-  # => ""
+  # =>
+  ""
 
   (code
     '(:whitespace @{:bc 1 :bl 1
                     :ec 2 :el 1} " "))
-  # => " "
+  # =>
+  " "
 
 
   (code
     '(:buffer @{:bc 1 :bl 1
                 :ec 12 :el 1} "@\"a buffer\""))
-  # => "@\"a buffer\""
+  # =>
+  `@"a buffer"`
 
   (code
     '@[:code @{:bc 1 :bl 1
@@ -437,16 +437,18 @@
                               :ec 6 :el 1} " ")
                (:number @{:bc 6 :bl 1
                           :ec 7 :el 1} "1"))])
-  # => "(+ 1 1)"
+  # =>
+  "(+ 1 1)"
 
   )
 
 (comment
 
-  (let [src "{:x  :y \n :z  [:a  :b    :c]}"]
-    (deep= (code (ast src))
-           src))
-  # => true
+  (def src "{:x  :y \n :z  [:a  :b    :c]}")
+
+  (code (ast src))
+  # =>
+  src
 
   )
 
