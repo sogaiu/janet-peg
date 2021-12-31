@@ -11,9 +11,9 @@
        [:number "1"] [:whitespace " "]
        [:number "2"]]])
 
-  (deep= (z/zip a-node)
-         [a-node nil])
-  # => true
+  (z/zip a-node)
+  # =>
+  [a-node nil]
 
   )
 
@@ -27,9 +27,9 @@
        [:number "1"] [:whitespace " "]
        [:number "2"]]])
 
-  (deep= (z/node (z/zip a-node))
-         a-node)
-  # => true
+  (z/node (z/zip a-node))
+  # =>
+  a-node
 
   )
 
@@ -40,21 +40,24 @@
     (r/ast "(+ 1 2)"))
 
   (z/has-children? a-node)
-  # => true
+  # =>
+  true
 
   (-> a-node
       z/zip
       z/down # [:tuple ...]
       z/node
       z/has-children?)
-  # => true
+  # =>
+  true
 
   (-> a-node
       z/zip-down
       z/down # [:symbol ...]
       z/node
       z/has-children?)
-  # => false
+  # =>
+  false
 
   )
 
@@ -65,20 +68,23 @@
     (z/zip (r/ast "(min (+ 1 2) 9)")))
 
   (z/branch? a-zip)
-  # => true
+  # =>
+  true
 
   (-> a-zip
       z/down
       # [:tuple ...]
       z/branch?)
-  # => true
+  # =>
+  true
 
   (-> a-zip
       z/down
       z/down
       # [:symbol ...]
       z/branch?)
-  # => false
+  # =>
+  false
 
   (-> a-zip
       z/down
@@ -86,7 +92,8 @@
       z/right-skip-wsc
       # [:tuple ...]
       z/branch?)
-  # => true
+  # =>
+  true
 
   )
 
@@ -108,14 +115,16 @@
   (-> a-zip
       z/children
       first)
-  # => [:symbol "do"]
+  # =>
+  [:symbol "do"]
 
   (-> a-zip
       z/down
       z/right-skip-wsc
       z/children
       first)
-  # => [:symbol "print"]
+  # =>
+  [:symbol "print"]
 
   )
 
@@ -138,7 +147,8 @@
       z/down
       z/down
       z/node)
-  # => [:symbol "do"]
+  # =>
+  [:symbol "do"]
 
   (-> a-zip
       z/down
@@ -146,7 +156,8 @@
       z/right-skip-wsc
       z/down
       z/node)
-  # => [:symbol "print"]
+  # =>
+  [:symbol "print"]
 
   (def b-zip
     (z/zip (r/ast "()")))
@@ -154,7 +165,8 @@
   (-> b-zip
       z/down
       z/down)
-  # => nil
+  # =>
+  nil
 
   )
 
@@ -165,7 +177,8 @@
         [:number "1"]]
       z/zip-down
       z/node)
-  # => [:number "1"]
+  # =>
+  [:number "1"]
 
   (def code
     ``
@@ -183,7 +196,8 @@
       z/right-skip-wsc
       z/right-skip-wsc
       z/node)
-    # => [:number "3"]
+  # =>
+  [:number "3"]
 
   )
 
@@ -205,7 +219,8 @@
                     (:number "0") (:whitespace " ")
                     (:number "7"))])
        :rs ()})
-  # => true
+  # =>
+  true
 
   (def b-zip
     (z/zip-down (r/ast "(++ i)")))
@@ -231,7 +246,8 @@
                               (:symbol "i"))])
                  :rs ()}
        :rs ((:whitespace " ") (:symbol "i"))})
-  # => true
+  # =>
+  true
 
   )
 
@@ -246,7 +262,8 @@
       z/down
       z/right
       z/node)
-  # => [:whitespace " "]
+  # =>
+  [:whitespace " "]
 
   (-> (r/ast ":skip-me [1 2 3 5 8]")
       z/zip-down
@@ -262,7 +279,8 @@
       z/right
       z/right
       z/node)
-  # => [:number "8"]
+  # =>
+  [:number "8"]
 
   )
 
@@ -289,7 +307,8 @@
                       #
                       true))
       z/node)
-  # => [:number "2"]
+  # =>
+  [:number "2"]
 
   (def code
     ``
@@ -321,7 +340,8 @@
                       #
                       true))
       z/node)
-  # => [:number "2"]
+  # =>
+  [:number "2"]
 
   )
 
@@ -344,7 +364,8 @@
       z/down
       z/right-skip-wsc
       z/node)
-  # => [:number "2"]
+  # =>
+  [:number "2"]
 
   (-> "(defn my-fn [] (+ x 1))"
       r/ast
@@ -356,7 +377,8 @@
       (z/insert-child [:symbol "x"])
       z/root
       r/code)
-  # => "(defn my-fn [x] (+ x 1))"
+  # =>
+  "(defn my-fn [x] (+ x 1))"
 
   )
 
@@ -378,7 +400,8 @@
                        [:string]
                        true))
       z/node)
-  # => [:string `"sit"`]
+  # =>
+  [:string `"sit"`]
 
   )
 
@@ -400,7 +423,8 @@
       z/left-skip-wsc
       z/left-skip-wsc
       z/node)
-  # => [:keyword ":heidi"]
+  # =>
+  [:keyword ":heidi"]
 
   )
 
@@ -438,7 +462,8 @@
       z/node
       r/code
       (= code))
-  # => true
+  # =>
+  true
 
   )
 
@@ -459,7 +484,8 @@
       z/root
       r/code
       (= code))
-  # => true
+  # =>
+  true
 
   )
 
@@ -475,14 +501,16 @@
       z/df-next
       z/df-next
       z/node)
-  # => [:symbol "+"]
+  # =>
+  [:symbol "+"]
 
   (-> a-zip
       z/df-next
       z/df-next
       z/df-next
       z/node)
-  # => [:whitespace " "]
+  # =>
+  [:whitespace " "]
 
   (-> a-zip
       z/df-next
@@ -490,7 +518,8 @@
       z/df-next
       z/df-next
       z/node)
-  # => [:number "1"]
+  # =>
+  [:number "1"]
 
   (-> a-zip
       z/df-next
@@ -499,7 +528,8 @@
       z/df-next
       z/df-next
       z/node)
-  # => [:whitespace " "]
+  # =>
+  [:whitespace " "]
 
   (-> a-zip
       z/df-next
@@ -510,7 +540,8 @@
       z/df-next
       z/df-next
       z/end?)
-  # => true
+  # =>
+  true
 
   )
 
@@ -523,7 +554,8 @@
       z/down
       z/rightmost
       z/node)
-  # => [:number "21"]
+  # =>
+  [:number "21"]
 
   (-> "(def m {:a 1 :b 2})"
       r/ast
@@ -533,7 +565,8 @@
       z/down
       z/rightmost
       z/node)
-  # => [:number "2"]
+  # =>
+  [:number "2"]
 
   )
 
@@ -550,7 +583,8 @@
       (z/replace [:number "8"])
       z/root
       r/code)
-  # => "(+ 1 (/ 2 8))"
+  # =>
+  "(+ 1 (/ 2 8))"
 
   )
 
@@ -573,7 +607,8 @@
                      z/node)))
       z/root
       r/code)
-  # => "(- (/ 2 3) 1)"
+  # =>
+  "(- (/ 2 3) 1)"
 
   )
 
@@ -594,7 +629,8 @@
                               string)]))
       z/root
       r/code)
-  # => "(+ 2 2)"
+  # =>
+  "(+ 2 2)"
 
   )
 
@@ -611,7 +647,8 @@
       z/remove
       z/root
       r/code)
-  # => "(def a 1)"
+  # =>
+  "(def a 1)"
 
   (try
     (-> "1"
@@ -619,7 +656,8 @@
         z/zip
         z/remove)
     ([e] e))
-  # => "Called `remove` at root"
+  # =>
+  "Called `remove` at root"
 
   )
 
@@ -637,7 +675,8 @@
       (z/append-child [:number "2"])
       z/root
       r/code)
-  # => "(def d {:a 1 :b 2})"
+  # =>
+  "(def d {:a 1 :b 2})"
 
   )
 
@@ -656,7 +695,8 @@
       (z/insert-right [:whitespace " "])
       z/root
       r/code)
-  # => "(defn my-fn [x y] (+ x y))"
+  # =>
+  "(defn my-fn [x y] (+ x y))"
 
   (try
     (-> "(+ 1 3)"
@@ -664,7 +704,8 @@
         z/zip
         (z/insert-right [:keyword ":oops"]))
     ([e] e))
-  # => "Called `insert-right` at root"
+  # =>
+  "Called `insert-right` at root"
 
   )
 
@@ -679,7 +720,8 @@
       (z/insert-left [:whitespace " "])
       z/root
       r/code)
-  # => "(def a 1)"
+  # =>
+  "(def a 1)"
 
   (try
     (-> "(/ 8 9)"
@@ -687,7 +729,8 @@
         z/zip
         (z/insert-left [:keyword ":oops"]))
     ([e] e))
-  # => "Called `insert-left` at root"
+  # =>
+  "Called `insert-left` at root"
 
   )
 
@@ -707,27 +750,25 @@
     #
     '[(:symbol "-") (:whitespace " ")
       (:number "8") (:whitespace " ")])
-  # => true
+  # =>
+  true
 
   )
 
 # rights
 (comment
 
-  (deep=
-    #
-    (-> "(+ (- 8 1) 2)"
-        r/ast
-        z/zip-down
-        z/down
-        z/right-skip-wsc
-        z/down
-        z/rights)
-    #
-    '[(:whitespace " ")
-      (:number "8") (:whitespace " ")
-      (:number "1")])
-  # => true
+  (-> "(+ (- 8 1) 2)"
+      r/ast
+      z/zip-down
+      z/down
+      z/right-skip-wsc
+      z/down
+      z/rights)
+  # =>
+  '[(:whitespace " ")
+    (:number "8") (:whitespace " ")
+    (:number "1")]
 
   )
 
@@ -741,7 +782,8 @@
       z/rightmost
       z/leftmost
       z/node)
-  # => [:symbol "+"]
+  # =>
+  [:symbol "+"]
 
   (-> "(+ (* 8 9) 2)"
       r/ast
@@ -751,42 +793,40 @@
       z/down
       z/leftmost
       z/node)
-  # => [:symbol "*"]
+  # =>
+  [:symbol "*"]
 
   )
 
 # path
 (comment
 
-  (deep=
-    #
-    (-> "(+ (/ 3 8) 2)"
-        r/ast
-        z/zip-down
-        z/down
-        z/right-skip-wsc
-        z/down
-        z/path)
-    #
-    '(@[:code
+  (-> "(+ (/ 3 8) 2)"
+      r/ast
+      z/zip-down
+      z/down
+      z/right-skip-wsc
+      z/down
+      z/path)
+  # =>
+  '(@[:code
+      (:tuple
+        (:symbol "+") (:whitespace " ")
         (:tuple
-          (:symbol "+") (:whitespace " ")
-          (:tuple
-            (:symbol "/") (:whitespace " ")
-            (:number "3") (:whitespace " ")
-            (:number "8"))
-          (:whitespace " ") (:number "2"))]
-       (:tuple
-         (:symbol "+") (:whitespace " ")
-         (:tuple
-           (:symbol "/") (:whitespace " ")
-           (:number "3") (:whitespace " ")
-           (:number "8"))
-         (:whitespace " ") (:number "2"))
+          (:symbol "/") (:whitespace " ")
+          (:number "3") (:whitespace " ")
+          (:number "8"))
+        (:whitespace " ") (:number "2"))]
+     (:tuple
+       (:symbol "+") (:whitespace " ")
        (:tuple
          (:symbol "/") (:whitespace " ")
          (:number "3") (:whitespace " ")
-         (:number "8"))))
-  # => true
+         (:number "8"))
+       (:whitespace " ") (:number "2"))
+     (:tuple
+       (:symbol "/") (:whitespace " ")
+       (:number "3") (:whitespace " ")
+       (:number "8")))
 
   )
