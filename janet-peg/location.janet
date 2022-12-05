@@ -415,7 +415,6 @@
   # =>
   " "
 
-
   (code
     '(:buffer @{:bc 1 :bl 1
                 :ec 12 :el 1} "@\"a buffer\""))
