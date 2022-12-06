@@ -92,5 +92,5 @@ src
 
 ## Examples
 
-See `(comment ...)` portions of source files and files in `tests` for examples.
+See `(comment ...)` portions of source files and files in `usages` for examples.
 
