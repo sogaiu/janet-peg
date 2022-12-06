@@ -102,7 +102,7 @@
 
   )
 
-# ast
+# par
 (comment
 
   (def src
@@ -112,7 +112,7 @@
     (/ 2 3)
     ``)
 
-  (ast src 0 :single)
+  (par src 0 :single)
   # =>
   '(@[:code
       (:tuple
@@ -121,19 +121,19 @@
         (:number "1"))]
      7)
 
-  (ast src 7 :single)
+  (par src 7 :single)
   # =>
   '(@[:code
       (:whitespace "\n")]
      8)
 
-  (ast src 8 :single)
+  (par src 8 :single)
   # =>
   '(@[:code
       (:whitespace "\n")]
      9)
 
-  (ast src 9 :single)
+  (par src 9 :single)
   # =>
   '(@[:code
       (:tuple
@@ -142,46 +142,46 @@
         (:number "3"))]
      16)
 
-  (ast "")
+  (par "")
   # =>
   @[:code]
 
   )
 
-# code
+# gen
 (comment
 
-  (code
+  (gen
     [:constant "true"])
   # =>
   "true"
 
-  (code
+  (gen
     [:keyword ":x"])
   # =>
   ":x"
 
-  (code
+  (gen
     [:long-buffer "@```looooong buffer```"])
   # =>
   "@```looooong buffer```"
 
-  (code
+  (gen
     [:string "\"a string\""])
   # =>
   `"a string"`
 
-  (code
+  (gen
     [:symbol "non-descript-symbol"])
   # =>
   "non-descript-symbol"
 
-  (code
+  (gen
     [:whitespace "\n"])
   # =>
   "\n"
 
-  (code
+  (gen
     '(:quasiquote
        (:tuple
          (:symbol "/") (:whitespace " ")
@@ -190,7 +190,7 @@
   # =>
   "~(/ 1 a)"
 
-  (code
+  (gen
     '(:quote
        (:tuple
          (:symbol "*") (:whitespace " ")
@@ -199,7 +199,7 @@
   # =>
   "'(* 0 x)"
 
-  (code
+  (gen
     '(:splice
        (:tuple
          (:keyword ":a") (:whitespace " ")
@@ -207,34 +207,34 @@
   # =>
   ";(:a :b)"
 
-  (code
+  (gen
     '(:unquote
        (:symbol "a")))
   # =>
   ",a"
 
-  (code
+  (gen
     '(:bracket-array
        (:keyword ":a") (:whitespace " ")
        (:keyword ":b")))
   # =>
   "@[:a :b]"
 
-  (code
+  (gen
     '@(:bracket-tuple
        (:keyword ":a") (:whitespace " ")
        (:keyword ":b")))
   # =>
   "[:a :b]"
 
-  (code
+  (gen
     '@(:table
        (:keyword ":a") (:whitespace " ")
        (:number "1")))
   # =>
   "@{:a 1}"
 
-  (code
+  (gen
     '@(:tuple
        (:keyword ":a") (:whitespace " ")
        (:keyword ":b")))

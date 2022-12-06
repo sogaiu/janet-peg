@@ -84,52 +84,52 @@
 
   )
 
-# code
+# gen
 (comment
 
-  (code
+  (gen
     '(:comment @{:bc 1 :bl 1
                  :ec 11 :el 1} "# hi there"))
   # =>
   "# hi there"
 
-  (code
+  (gen
     '(:number @{:bc 1 :bl 1
                 :ec 4 :el 1} "8.3"))
   # =>
   "8.3"
 
-  (code
+  (gen
     '(:symbol @{:bc 1 :bl 1
                 :ec 7 :el 1} "printf"))
   # =>
   "printf"
 
-  (code
+  (gen
     '(:keyword @{:bc 1 :bl 1
                  :ec 7 :el 1} ":smile"))
   # =>
   ":smile"
 
-  (code
+  (gen
     '(:string @{:bc 1 :bl 1
                 :ec 6 :el 1} "\"fun\""))
   # =>
   `"fun"`
 
-  (code
+  (gen
     '(:long-string @{:bc 1 :bl 1
                      :ec 13 :el 1} "``long-fun``"))
   # =>
   "``long-fun``"
 
-  (code
+  (gen
     '(:long-buffer @{:bc 1 :bl 1
                      :ec 21 :el 1} "@``long-buffer-fun``"))
   # =>
   "@``long-buffer-fun``"
 
-  (code
+  (gen
     '(:quasiquote @{:bc 1 :bl 1
                     :ec 3 :el 1}
                   (:symbol @{:bc 2 :bl 1
