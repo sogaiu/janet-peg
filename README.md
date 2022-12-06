@@ -31,6 +31,21 @@ Basic Parsing and Rendering
 (rewrite/code (rewrite/ast src))
 # =>
 src
+
+# replace underscores in keywords with dashes
+(def src-2 "(defn a [] {:a_1 1 :b_2 2})")
+
+(rewrite/code
+  (postwalk |(if (and (= (type $) :tuple)
+                      (= (first $) :keyword)
+                      (string/find "_" (in $ 1)))
+               (tuple ;(let [arr (array ;$)]
+                         (put arr 1
+                              (string/replace-all "_" "-" (in $ 1)))))
+               $)
+            (rewrite/ast src-2)))
+# =>
+"(defn a [] {:a-1 1 :b-2 2})"
 ```
 
 With Location Info
@@ -81,3 +96,8 @@ With Location Info
 # =>
 src
 ```
+
+## Examples
+
+See `(comment ...)` portions of source files and files in `tests` for examples.
+
