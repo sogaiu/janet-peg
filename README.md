@@ -9,7 +9,7 @@ Basic Parsing and Generation
 (import janet-peg/rewrite)
 
 # parse code string
-(rewrite/ast "(+ 1 1)")
+(rewrite/par "(+ 1 1)")
 # =>
 '@[:code
    (:tuple
@@ -18,7 +18,7 @@ Basic Parsing and Generation
      (:number "1"))]
 
 # generate code string
-(rewrite/code
+(rewrite/gen
   '@(:struct
      (:keyword ":a") (:whitespace " ")
      (:number "1")))
@@ -28,14 +28,14 @@ Basic Parsing and Generation
 # roundtrip
 (def src "{:x  :y \n :z  [:a  :b    :c]}")
 
-(rewrite/code (rewrite/ast src))
+(rewrite/gen (rewrite/par src))
 # =>
 src
 
 # replace underscores in keywords with dashes
 (def src-2 "(defn a [] {:a_1 1 :b_2 2})")
 
-(rewrite/code
+(rewrite/gen
   (postwalk |(if (and (= (type $) :tuple)
                       (= (first $) :keyword)
                       (string/find "_" (in $ 1)))
@@ -43,7 +43,7 @@ src
                          (put arr 1
                               (string/replace-all "_" "-" (in $ 1)))))
                $)
-            (rewrite/ast src-2)))
+            (rewrite/par src-2)))
 # =>
 "(defn a [] {:a-1 1 :b-2 2})"
 ```
@@ -53,7 +53,7 @@ With Location Info
 (import janet-peg/location)
 
 # parse code string
-(location/ast "(+ 1 1)")
+(location/par "(+ 1 1)")
 # =>
 '@[:code @{:bc 1 :bl 1
            :ec 8 :el 1}
@@ -71,7 +71,7 @@ With Location Info
                       :ec 7 :el 1} "1"))]
 
 # generate code string
-(location/code
+(location/gen
   '@[:code @{}
      (:tuple @{}
              (:symbol @{} "+")
@@ -85,7 +85,7 @@ With Location Info
 # roundtrip
 (def src "{:x  :y \n :z  [:a  :b    :c]}")
 
-(location/code (location/ast src))
+(location/gen (location/par src))
 # =>
 src
 ```

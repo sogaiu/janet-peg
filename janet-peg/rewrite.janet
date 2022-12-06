@@ -80,7 +80,7 @@
     # tried using a table with a peg but had a problem, so use a struct
     (table/to-struct jca)))
 
-(defn ast
+(defn par
   [src &opt start single]
   (default start 0)
   (if single
@@ -92,9 +92,12 @@
       (array/insert tree 0 :code)
       @[:code])))
 
+# XXX: backward compatibility
+(def ast par)
+
 (comment
 
-  (ast "(+ 1 1)")
+  (par "(+ 1 1)")
   # =>
   '@[:code
      (:tuple
@@ -104,12 +107,12 @@
 
   )
 
-(defn code*
+(defn gen*
   [an-ast buf]
   (case (first an-ast)
     :code
     (each elt (drop 1 an-ast)
-      (code* elt buf))
+      (gen* elt buf))
     #
     :buffer
     (buffer/push-string buf (in an-ast 1))
@@ -136,96 +139,99 @@
     (do
       (buffer/push-string buf "@(")
       (each elt (drop 1 an-ast)
-        (code* elt buf))
+        (gen* elt buf))
       (buffer/push-string buf ")"))
     :bracket-array
     (do
       (buffer/push-string buf "@[")
       (each elt (drop 1 an-ast)
-        (code* elt buf))
+        (gen* elt buf))
       (buffer/push-string buf "]"))
     :bracket-tuple
     (do
       (buffer/push-string buf "[")
       (each elt (drop 1 an-ast)
-        (code* elt buf))
+        (gen* elt buf))
       (buffer/push-string buf "]"))
     :tuple
     (do
       (buffer/push-string buf "(")
       (each elt (drop 1 an-ast)
-        (code* elt buf))
+        (gen* elt buf))
       (buffer/push-string buf ")"))
     :struct
     (do
       (buffer/push-string buf "{")
       (each elt (drop 1 an-ast)
-        (code* elt buf))
+        (gen* elt buf))
       (buffer/push-string buf "}"))
     :table
     (do
       (buffer/push-string buf "@{")
       (each elt (drop 1 an-ast)
-        (code* elt buf))
+        (gen* elt buf))
       (buffer/push-string buf "}"))
     #
     :fn
     (do
       (buffer/push-string buf "|")
       (each elt (drop 1 an-ast)
-        (code* elt buf)))
+        (gen* elt buf)))
     :quasiquote
     (do
       (buffer/push-string buf "~")
       (each elt (drop 1 an-ast)
-        (code* elt buf)))
+        (gen* elt buf)))
     :quote
     (do
       (buffer/push-string buf "'")
       (each elt (drop 1 an-ast)
-        (code* elt buf)))
+        (gen* elt buf)))
     :splice
     (do
       (buffer/push-string buf ";")
       (each elt (drop 1 an-ast)
-        (code* elt buf)))
+        (gen* elt buf)))
     :unquote
     (do
       (buffer/push-string buf ",")
       (each elt (drop 1 an-ast)
-        (code* elt buf)))
+        (gen* elt buf)))
     ))
 
-(defn code
+(defn gen
   [an-ast]
   (let [buf @""]
-    (code* an-ast buf)
+    (gen* an-ast buf)
     (string buf)))
+
+# XXX: backward compatibility
+(def code gen)
 
 (comment
 
-  (code
+  (gen
     [:code])
   # =>
   ""
 
-  (code
+  (gen
     [:code
      [:buffer "@\"buffer me\""]])
   # =>
   `@"buffer me"`
 
-  (code
+  (gen
     [:comment "# i am a comment"])
   # =>
   "# i am a comment"
 
-  (code
+  (gen
     [:long-string "```longish string```"])
   # =>
   "```longish string```"
 
-  (code
+  (gen
     '(:fn
        (:tuple
          (:symbol "-") (:whitespace " ")
@@ -234,14 +240,14 @@
   # =>
   "|(- $ 8)"
 
-  (code
+  (gen
     '(:array
        (:keyword ":a") (:whitespace " ")
        (:keyword ":b")))
   # =
   "@(:a :b)"
 
-  (code
+  (gen
     '@(:struct
        (:keyword ":a") (:whitespace " ")
        (:number "1")))
@@ -254,7 +260,7 @@
 
   (def src "{:x  :y \n :z  [:a  :b    :c]}")
 
-  (code (ast src))
+  (gen (par src))
   # =>
   src
 
@@ -267,7 +273,7 @@
     (let [src (slurp (string (os/getenv "HOME")
                              "/src/janet/src/boot/boot.janet"))]
       (= (string src)
-         (code (ast src))))
+         (gen (par src))))
 
     # 33 ms per
     (let [start (os/time)]
@@ -276,7 +282,7 @@
               (slurp (string (os/getenv "HOME")
                              "/src/janet/src/boot/boot.janet"))]
           (= src
-             (code (ast src)))))
+             (gen (par src)))))
       (print (- (os/time) start)))
 
     )

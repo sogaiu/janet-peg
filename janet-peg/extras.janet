@@ -302,9 +302,9 @@
 
     (let [src (slurp (string (os/getenv "HOME")
                              "/src/janet-peg/janet-peg/rewrite.janet"))
-          nodes (rewrite/ast src)]
+          nodes (rewrite/par src)]
       (print
-        (rewrite/code
+        (rewrite/gen
           (postwalk |(if (and (= (type $) :tuple)
                               (= (first $) :keyword)
                               (string/find "_" (in $ 1)))
