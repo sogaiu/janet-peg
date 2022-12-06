@@ -94,3 +94,21 @@ src
 
 See `(comment ...)` portions of source files and files in `usages` for examples.
 
+## Roundtrip Testing
+
+To perform roundtrip testing on syntactically valid `.janet` files, use the
+`test-samples.janet` script in the `support` directory.
+
+For example, to test all `.janet` files in a directory at path `/tmp/samples`:
+```
+janet support/test-samples.janet /tmp/samples
+```
+
+Individual syntactically valid `.janet` files may also be tested by
+specifying file paths.
+
+For example, to test `sample.janet` that lives under `/tmp`:
+```
+janet support/test-samples.janet /tmp/sample.janet
+```
+
