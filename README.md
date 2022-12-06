@@ -72,20 +72,13 @@ With Location Info
 
 # generate code string
 (location/code
-  '@[:code @{:bc 1 :bl 1
-             :ec 8 :el 1}
-     (:tuple @{:bc 1 :bl 1
-               :ec 8 :el 1}
-             (:symbol @{:bc 2 :bl 1
-                        :ec 3 :el 1} "+")
-             (:whitespace @{:bc 3 :bl 1
-                            :ec 4 :el 1} " ")
-             (:number @{:bc 4 :bl 1
-                        :ec 5 :el 1} "1")
-             (:whitespace @{:bc 5 :bl 1
-                            :ec 6 :el 1} " ")
-             (:number @{:bc 6 :bl 1
-                        :ec 7 :el 1} "1"))])
+  '@[:code @{}
+     (:tuple @{}
+             (:symbol @{} "+")
+             (:whitespace @{} " ")
+             (:number @{} "1")
+             (:whitespace @{} " ")
+             (:number @{} "1"))])
 # =>
 "(+ 1 1)"
 
