@@ -1,10 +1,10 @@
 # janet-peg
 
-Some code for parsing and rendering as Janet source code
+Some code for parsing and generating Janet source code
 
 ## Usage Examples
 
-Basic Parsing and Rendering
+Basic Parsing and Generation
 ```janet
 (import janet-peg/rewrite)
 
@@ -17,7 +17,7 @@ Basic Parsing and Rendering
      (:number "1") (:whitespace " ")
      (:number "1"))]
 
-# render as string
+# generate code string
 (rewrite/code
   '@(:struct
      (:keyword ":a") (:whitespace " ")
@@ -70,7 +70,7 @@ With Location Info
            (:number @{:bc 6 :bl 1
                       :ec 7 :el 1} "1"))]
 
-# render as string
+# generate code string
 (location/code
   '@[:code @{:bc 1 :bl 1
              :ec 8 :el 1}
