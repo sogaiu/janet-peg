@@ -105,6 +105,12 @@
        (:number "1") (:whitespace " ")
        (:number "1"))]
 
+  (par "`alice``bob`")
+  # =>
+  '@[:code
+     (:long-string "`alice`")
+     (:long-string "`bob`")]
+
   )
 
 (defn gen*

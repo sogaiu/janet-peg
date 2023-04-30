@@ -180,7 +180,7 @@
                  :delim (some "`")
                  :close (cmt (sequence (not (look -1 "`"))
                                        (backref :n)
-                                       (capture :delim))
+                                       (capture (backmatch :n)))
                              ,=)}
     #
     :long-buffer ,(atom-node :long-buffer
