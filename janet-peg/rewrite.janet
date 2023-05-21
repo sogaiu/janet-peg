@@ -1,7 +1,6 @@
 (import ./grammar :prefix "")
 
 (def jg-capture-ast
-  # jg is a struct, need something mutable
   (let [jca (table ;(kvs jg))]
     # override things that need to be captured
     (each kwd [:buffer :comment :constant :keyword :long-buffer
@@ -19,8 +18,7 @@
                   ;(put (array ;(in jca kwd))
                         2 ~(cmt (capture ,(get-in jca [kwd 2]))
                                 ,|[kwd ;(slice $& 0 -2)])))))
-    # tried using a table with a peg but had a problem, so use a struct
-    (table/to-struct jca)))
+    jca))
 
 (comment
 
@@ -73,12 +71,8 @@
   )
 
 (def jg-capture-top-level-ast
-  # jg is a struct, need something mutable
-  (let [jca (table ;(kvs jg-capture-ast))]
-    (put jca
-         :main ~(sequence :input (position)))
-    # tried using a table with a peg but had a problem, so use a struct
-    (table/to-struct jca)))
+  (put (table ;(kvs jg-capture-ast))
+       :main ~(sequence :input (position))))
 
 (defn par
   [src &opt start single]
