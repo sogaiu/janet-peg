@@ -5,7 +5,8 @@
                     :form)
      #
      :non-form (choice :whitespace
-                       :comment)
+                       :comment
+                       :discard)
      #
      :whitespace (choice (some (set " \0\f\t\v"))
                          (choice "\r\n"
@@ -14,6 +15,14 @@
      #
      :comment (sequence "#"
                         (any (if-not (set "\r\n") 1)))
+     #
+     :discard (sequence "\\#"
+                        (opt (sequence (any (choice :comment
+                                                    :whitespace))
+                                       :discard))
+                        (any (choice :comment
+                                     :whitespace))
+                        :form)
      #
      :form (choice :reader-macro
                    :collection
@@ -149,6 +158,14 @@
   @[]
 
   (peg/match jg "# hello")
+  # =>
+  @[]
+
+  (peg/match jg `\# 1`)
+  # =>
+  @[]
+
+  (peg/match jg `[0 \# \# 1 2 8]`)
   # =>
   @[]
 

@@ -51,7 +51,8 @@
                     :form)
      #
      :non-form (choice :whitespace
-                       :comment)
+                       :comment
+                       :discard)
      #
      :whitespace ,(atom-node :whitespace
                              '(choice (some (set " \0\f\t\v"))
@@ -70,6 +71,19 @@
      :comment ,(atom-node :comment
                           '(sequence "#"
                                      (any (if-not (set "\r\n") 1))))
+     #
+     :discard
+     (cmt (capture (sequence (line) (column)
+                             "\\#"
+                             (opt (sequence (any (choice :comment
+                                                         :whitespace))
+                                            :discard))
+                             (any (choice :comment
+                                          :whitespace))
+                             :form
+                             (line) (column)))
+          ,|[:discard (make-attrs ;(slice $& 0 2) ;(slice $& -4 -2))
+             ;(slice $& 2 -4)])
      #
      :form (choice # reader macros
                    :fn
@@ -215,6 +229,12 @@
   (get (peg/match loc-grammar "# hi there") 2)
   # =>
   '(:comment @{:bc 1 :bl 1 :ec 11 :el 1} "# hi there")
+
+  (get (peg/match loc-grammar `\# 8`) 2)
+  # =>
+  '(:discard @{:bc 1 :bl 1 :ec 5 :el 1}
+             (:whitespace @{:bc 3 :bl 1 :ec 4 :el 1} " ")
+             (:number @{:bc 4 :bl 1 :ec 5 :el 1} "8"))
 
   (get (peg/match loc-grammar "8.3") 2)
   # =>
@@ -382,6 +402,12 @@
         (gen* elt buf))
       (buffer/push-string buf "}"))
     #
+    :discard
+    (do
+      (buffer/push-string buf `\#`)
+      (each elt (drop 2 an-ast)
+        (gen* elt buf)))
+    #
     :fn
     (do
       (buffer/push-string buf "|")
@@ -439,6 +465,13 @@
   `@"a buffer"`
 
   (gen
+    '(:discard @{:bc 1 :bl 1 :ec 5 :el 1}
+               (:whitespace @{:bc 3 :bl 1 :ec 4 :el 1} " ")
+               (:number @{:bc 4 :bl 1 :ec 5 :el 1} "9")))
+  # =>
+  `\# 9`
+
+  (gen
     '@[:code @{:bc 1 :bl 1
                :ec 8 :el 1}
        (:tuple @{:bc 1 :bl 1
@@ -461,6 +494,12 @@
 (comment
 
   (def src "{:x  :y \n :z  [:a  :b    :c]}")
+
+  (gen (par src))
+  # =>
+  src
+
+  (def src `[1 \# \# 2 3 8]`)
 
   (gen (par src))
   # =>

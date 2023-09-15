@@ -8,7 +8,7 @@
       (put jca kwd
                ~(cmt (capture ,(in jca kwd))
                      ,|[kwd $])))
-    (each kwd [:fn :quasiquote :quote :splice :unquote]
+    (each kwd [:discard :fn :quasiquote :quote :splice :unquote]
       (put jca kwd
                ~(cmt (capture ,(in jca kwd))
                      ,|[kwd ;(slice $& 0 -2)])))
@@ -37,6 +37,10 @@
   (peg/match jg-capture-ast "# hello")
   # =>
   @[[:comment "# hello"]]
+
+  (peg/match jg-capture-ast `\# 2`)
+  # =>
+  @[[:discard [:whitespace " "] [:number "2"]]]
 
   (peg/match jg-capture-ast ":a")
   # =>
