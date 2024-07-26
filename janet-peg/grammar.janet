@@ -61,15 +61,18 @@
                          :table
                          :struct)
      #
-     :number (drop (cmt
-                     (capture (some :name-char))
-                     ,scan-number))
+     :number (drop (sequence (cmt (capture (some :num-char))
+                                  ,scan-number)
+                             (opt (sequence ":" (range "AZ" "az")))))
      #
-     :name-char (choice (range "09" "AZ" "az" "\x80\xFF")
-                        (set "!$%&*+-./:<?=>@^_"))
+     :num-char (choice (range "09" "AZ" "az")
+                       (set "&+-._"))
      #
      :constant (sequence (choice "false" "nil" "true")
                          (not :name-char))
+     #
+     :name-char (choice (range "09" "AZ" "az" "\x80\xFF")
+                        (set "!$%&*+-./:<?=>@^_"))
      #
      :buffer (sequence "@\""
                        (any (choice :escape
@@ -143,6 +146,26 @@
   (peg/match jg "")
   # =>
   nil
+
+  (peg/match jg "11")
+  # =>
+  @[]
+
+  (peg/match jg "0xff")
+  # =>
+  @[]
+
+  (peg/match jg "1:u")
+  # =>
+  @[]
+
+  (peg/match jg "-2:s")
+  # =>
+  @[]
+
+  (peg/match jg "1e2:n")
+  # =>
+  @[]
 
   (peg/match jg "@\"i am a buffer\"")
   # =>

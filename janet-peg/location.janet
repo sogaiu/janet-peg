@@ -140,16 +140,19 @@
      :struct ,(collection-node :struct "{" "}")
      #
      :number ,(atom-node :number
-                         ~(drop (cmt
-                                  (capture (some :name-char))
-                                  ,scan-number)))
+                         ~(drop (sequence (cmt (capture (some :num-char))
+                                               ,scan-number)
+                                          (opt (sequence ":" (range "AZ" "az"))))))
      #
-     :name-char (choice (range "09" "AZ" "az" "\x80\xFF")
-                        (set "!$%&*+-./:<?=>@^_"))
+     :num-char (choice (range "09" "AZ" "az")
+                       (set "&+-._"))
      #
      :constant ,(atom-node :constant
                            '(sequence (choice "false" "nil" "true")
                                       (not :name-char)))
+     #
+     :name-char (choice (range "09" "AZ" "az" "\x80\xFF")
+                        (set "!$%&*+-./:<?=>@^_"))
      #
      :buffer ,(atom-node :buffer
                          '(sequence `@"`
@@ -216,9 +219,41 @@
   # =>
   '(:comment @{:bc 1 :bl 1 :ec 11 :el 1} "# hi there")
 
+  (get (peg/match loc-grammar "1_000_000") 2)
+  # =>
+  '(:number @{:bc 1 :bl 1 :ec 10 :el 1} "1_000_000")
+
   (get (peg/match loc-grammar "8.3") 2)
   # =>
   '(:number @{:bc 1 :bl 1 :ec 4 :el 1} "8.3")
+
+  (get (peg/match loc-grammar "1e2") 2)
+  # =>
+  '(:number @{:bc 1 :bl 1 :ec 4 :el 1} "1e2")
+
+  (get (peg/match loc-grammar "0xfe") 2)
+  # =>
+  '(:number @{:bc 1 :bl 1 :ec 5 :el 1} "0xfe")
+
+  (get (peg/match loc-grammar "2r01") 2)
+  # =>
+  '(:number @{:bc 1 :bl 1 :ec 5 :el 1} "2r01")
+
+  (get (peg/match loc-grammar "3r101&01") 2)
+  # =>
+  '(:number @{:bc 1 :bl 1 :ec 9 :el 1} "3r101&01")
+
+  (get (peg/match loc-grammar "2:u") 2)
+  # =>
+  '(:number @{:bc 1 :bl 1 :ec 4 :el 1} "2:u")
+
+  (get (peg/match loc-grammar "-8:s") 2)
+  # =>
+  '(:number @{:bc 1 :bl 1 :ec 5 :el 1} "-8:s")
+
+  (get (peg/match loc-grammar "1e2:n") 2)
+  # =>
+  '(:number @{:bc 1 :bl 1 :ec 6 :el 1} "1e2:n")
 
   (get (peg/match loc-grammar "printf") 2)
   # =>
