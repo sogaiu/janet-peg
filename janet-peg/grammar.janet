@@ -74,22 +74,22 @@
      :name-char (choice (range "09" "AZ" "az" "\x80\xFF")
                         (set "!$%&*+-./:<?=>@^_"))
      #
-     :buffer (sequence "@\""
+     :buffer (sequence `@"`
                        (any (choice :escape
-                                    (if-not "\"" 1)))
-                       "\"")
+                                    (if-not `"` 1)))
+                       `"`)
      #
-     :escape (sequence "\\"
+     :escape (sequence `\`
                        (choice (set `"'0?\abefnrtvz`)
                                (sequence "x" [2 :h])
                                (sequence "u" [4 :h])
                                (sequence "U" [6 :h])
                                (error (constant "bad escape"))))
      #
-     :string (sequence "\""
+     :string (sequence `"`
                        (any (choice :escape
-                                    (if-not "\"" 1)))
-                       "\"")
+                                    (if-not `"` 1)))
+                       `"`)
      #
      :long-string :long-bytes
      #
