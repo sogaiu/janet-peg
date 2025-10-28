@@ -1,4 +1,4 @@
-(import ../janet-peg/grammar :prefix "")
+(import ../lib/grammar :prefix "")
 
 # jg
 (comment

@@ -1,4 +1,4 @@
-(import ../janet-peg/location :prefix "")
+(import ../lib/location :prefix "")
 
 # loc-grammar
 (comment

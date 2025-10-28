@@ -1,4 +1,4 @@
-(import ../janet-peg/rewrite :prefix "")
+(import ../lib/rewrite :prefix "")
 
 # jg-capture-ast
 (comment

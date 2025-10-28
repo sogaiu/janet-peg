@@ -4,7 +4,7 @@
 #   sample source code.  correct results are desirable, but information
 #   about speed (perhaps even memory?) might also be nice to obtain.
 
-(import ../janet-peg/rewrite)
+(import ../lib/rewrite)
 
 (def sep
   (if (= :windows (os/which))

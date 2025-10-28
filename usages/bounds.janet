@@ -1,4 +1,4 @@
-(import ../janet-peg/bounds :prefix "")
+(import ../lib/bounds :prefix "")
 
 (comment
 
