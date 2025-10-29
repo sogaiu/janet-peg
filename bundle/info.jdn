@@ -1,13 +1,32 @@
 {:name "janet-peg"
  :url "https://github.com/sogaiu/janet-peg"
  :repo "git+https://github.com/sogaiu/janet-peg.git"
- :sources [{:prefix "janet-peg"
-            :items ["lib"
-                    "init.janet"
-                    # XXX: backward-compatibility
-                    ["lib/bounds.janet" "bounds.janet"]
-                    ["lib/extras.janet" "extras.janet"]
-                    ["lib/grammar.janet" "grammar.janet"]
-                    ["lib/location.janet" "location.janet"]
-                    ["lib/rewrite.janet" "rewrite.janet"]]}]}
+
+ :vendored
+ {"jeat"
+  [{:name "janet-ex-as-tests"
+    :url "https://github.com/sogaiu/janet-ex-as-tests"
+    :tag "3dfb3dd617879cd94651a8cb6c354c2de0bf0b3c"
+    :files ["init.janet"
+            "location.janet"
+            "loc-jipper.janet"
+            "make-and-run-tests.janet"
+            "to-test.janet"
+            "zipper.janet"]}]
+  "test"
+  [{:name "janet-ex-as-tests"
+    :url "https://github.com/sogaiu/janet-ex-as-tests"
+    :tag "3dfb3dd617879cd94651a8cb6c354c2de0bf0b3c"
+    :files ["trigger-jeat.janet"]}]}
+
+ :sources
+ [{:prefix "janet-peg"
+   :items ["lib"
+           "init.janet"
+           # XXX: backward-compatibility
+           ["lib/bounds.janet" "bounds.janet"]
+           ["lib/extras.janet" "extras.janet"]
+           ["lib/grammar.janet" "grammar.janet"]
+           ["lib/location.janet" "location.janet"]
+           ["lib/rewrite.janet" "rewrite.janet"]]}]}
 
