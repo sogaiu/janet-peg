@@ -3,7 +3,13 @@
  :repo "git+https://github.com/sogaiu/janet-peg.git"
 
  :vendored
- {"jeat"
+ {"bundle"
+  [{:name "some-bundle-bits"
+    :url "https://github.com/sogaiu/some-bundle-bits"
+    :tag "4107fac44205f99a2e8eafddb26ef6126800d02e"
+    :files ["mypath.janet"
+            "support.janet"]}]
+  "jeat"
   [{:name "janet-ex-as-tests"
     :url "https://github.com/sogaiu/janet-ex-as-tests"
     :tag "3dfb3dd617879cd94651a8cb6c354c2de0bf0b3c"
