@@ -3,27 +3,21 @@
  :repo "git+https://github.com/sogaiu/janet-peg.git"
 
  :vendored
- {"bundle"
-  [{:name "some-bundle-bits"
-    :url "https://github.com/sogaiu/some-bundle-bits"
-    :tag "4107fac44205f99a2e8eafddb26ef6126800d02e"
-    :files ["mypath.janet"
-            "support.janet"]}]
-  "jeat"
-  [{:name "janet-ex-as-tests"
-    :url "https://github.com/sogaiu/janet-ex-as-tests"
-    :tag "3dfb3dd617879cd94651a8cb6c354c2de0bf0b3c"
-    :files ["init.janet"
-            "location.janet"
-            "loc-jipper.janet"
-            "make-and-run-tests.janet"
-            "to-test.janet"
-            "zipper.janet"]}]
-  "test"
-  [{:name "janet-ex-as-tests"
-    :url "https://github.com/sogaiu/janet-ex-as-tests"
-    :tag "3dfb3dd617879cd94651a8cb6c354c2de0bf0b3c"
-    :files ["trigger-jeat.janet"]}]}
+ [{:name "some-bundle-bits"
+   :url "https://github.com/sogaiu/some-bundle-bits"
+   :tag "4107fac44205f99a2e8eafddb26ef6126800d02e"
+   :files [["mypath.janet" "bundle/"]
+           ["support.janet" "bundle/"]]}
+  {:name "janet-ex-as-tests"
+   :url "https://github.com/sogaiu/janet-ex-as-tests"
+   :tag "3dfb3dd617879cd94651a8cb6c354c2de0bf0b3c"
+   :files [["init.janet" "jeat/"]
+           ["location.janet" "jeat/"]
+           ["loc-jipper.janet" "jeat/"]
+           ["make-and-run-tests.janet" "jeat/"]
+           ["to-test.janet" "jeat/"]
+           ["zipper.janet" "jeat/"]
+           ["trigger-jeat.janet" "test/"]]}]
 
  :sources
  [{:prefix "janet-peg"
