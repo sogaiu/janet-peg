@@ -1,4 +1,4 @@
-(import ./support :as s)
+(import ./sbb :as s)
 
 (defn install
   [manifest &]

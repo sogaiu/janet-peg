@@ -5,9 +5,9 @@
  :vendored
  [{:name "some-bundle-bits"
    :url "https://github.com/sogaiu/some-bundle-bits"
-   :tag "4107fac44205f99a2e8eafddb26ef6126800d02e"
-   :files [["mypath.janet" "bundle/"]
-           ["support.janet" "bundle/"]]}
+   :tag "b9059643baa2d0a822f915e9f1b6cd80308d23c4"
+   :prefix "bundle"
+   :files ["sbb.janet"]}
   {:name "janet-ex-as-tests"
    :url "https://github.com/sogaiu/janet-ex-as-tests"
    :tag "3dfb3dd617879cd94651a8cb6c354c2de0bf0b3c"
