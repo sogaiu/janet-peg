@@ -5,7 +5,7 @@
  :vendored
  [{:name "some-bundle-bits"
    :url "https://github.com/sogaiu/some-bundle-bits"
-   :tag "b9059643baa2d0a822f915e9f1b6cd80308d23c4"
+   :tag "7ddb7ec53a6eb8c81b0c22bb7710a01fff57a759"
    :paths [["sbb.janet" "bundle/"]]}
   {:name "jtfm"
    :url "https://github.com/sogaiu/jtfm"

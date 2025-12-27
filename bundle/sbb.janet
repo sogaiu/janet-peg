@@ -398,16 +398,18 @@
   (each src (get-in manifest [:info :sources])
     (def {:prefix prefix
           :items items} src)
-    (bundle/add-directory manifest prefix)
+    (when prefix
+      (bundle/add-directory manifest prefix))
+    (def pre (if prefix (string prefix s) ""))
     (each i items
       (cond
         (string? i)
-        (bundle/add manifest i (string prefix s i))
+        (bundle/add manifest i (string pre i))
         #
         (tuple? i)
         (let [[src rename] i]
           # XXX: ensure src refers to a file?
-          (bundle/add-file manifest src (string prefix s rename)))
+          (bundle/add-file manifest src (string pre rename)))
         #
         (errorf "expected string or tuple, got: %n" (type i))))))
 
